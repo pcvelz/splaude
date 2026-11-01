@@ -21,6 +21,45 @@ where each one stands upstream:
 Launching a new engine only once the old one has exited started here too, and is
 now in upstream Splash ([#616](https://github.com/incoai/splash/pull/616)).
 
+### Claude Code against Splash, including headless and long runs
+
+Start the server with the fork's Claude Code options:
+
+```bash
+splash-claude serve --model unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M \
+  --accept-any-model --reasoning off --sampling-headers \
+  --sampling-default temperature=0.5 --sampling-default top_p=0.8 \
+  --sampling-default top_k=20
+```
+
+Then point Claude Code at it, interactive or with `-p`:
+
+```bash
+export ANTHROPIC_BASE_URL=http://127.0.0.1:8000
+export ANTHROPIC_AUTH_TOKEN=local
+export API_TIMEOUT_MS=86400000
+export CLAUDE_STREAM_IDLE_TIMEOUT_MS=86400000
+export CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK=1
+
+claude --model local                     # interactive
+claude --model local -p "your task"      # headless
+```
+
+Why each setting:
+
+| Setting | Why |
+|---|---|
+| `--accept-any-model` | Claude Code sends its own model names, also for side requests such as titles and summaries. Every name is served by the loaded model. |
+| `--reasoning off` | Claude Code asks for thinking on every turn. Without this, every turn reasons. |
+| `--sampling-default` | Claude Code sends no sampling fields, so these are the values every request gets. Without them the model's generation config applies. |
+| `--sampling-headers` | Lets a run set its own sampling through headers: `ANTHROPIC_CUSTOM_HEADERS=$'X-Temperature: 0.7\nX-Presence-Penalty: 0.5'`. |
+| `ANTHROPIC_AUTH_TOKEN` | Any value. Splash does not check it; Claude Code needs one to skip its login. |
+| `API_TIMEOUT_MS`, `CLAUDE_STREAM_IDLE_TIMEOUT_MS` | A prefill of a long context can take many minutes before the first token. With the default limits the client gives up first. |
+| `CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK=1` | After a stream error Claude Code retries without streaming. That request gets no keepalive and hits the client's time limit on a long prompt. |
+
+For a server started with another `--port`, use that port in
+`ANTHROPIC_BASE_URL`.
+
 It works together with
 [llama-swap-macos-extended](https://github.com/pcvelz/llama-swap-macos-extended),
 a proxy that switches between Splash and llama.cpp. The rest of this README is
