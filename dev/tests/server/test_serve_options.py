@@ -65,6 +65,11 @@ OPTIONS = {
         ("", "has space", "a?b", "a#b", "a%b", "a\\b", "/a", "a//b", "a/../b"),
         repeatable=True,
     ),
+    "--chat-template-file": values(
+        "--chat-template-file",
+        {"/t/qwen.jinja": "/t/qwen.jinja"},
+        ("", " "),
+    ),
     "--sampling-default": values(
         "--sampling-default",
         {"temperature=0.6": ("temperature", 0.6), "top_k=40": ("top_k", 40)},
@@ -387,6 +392,24 @@ class ServeOptionsTests(unittest.TestCase):
         self.refuse(
             api.parse_args, [*SERVER_ARGS, "--sampling-default", "temperature=5"]
         )
+
+    def test_chat_template_file_replaces_the_tokenizer_template(self):
+        import tempfile
+
+        from server.chat_templates import ChatTemplateError, load_template_file
+
+        tokenizer = mock.Mock(chat_template="shipped")
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "t.jinja"
+            path.write_text("fixed {{ x }}")
+            digest = load_template_file(tokenizer, path)
+            self.assertEqual(tokenizer.chat_template, "fixed {{ x }}")
+            self.assertEqual(len(digest), 64)
+            tokenizer.chat_template = "shipped"
+            with self.assertRaises(ChatTemplateError):
+                load_template_file(tokenizer, Path(directory) / "missing.jinja")
+            self.assertEqual(tokenizer.chat_template, "shipped")
+        self.assertIsNone(api.parse_args(SERVER_ARGS).chat_template_file)
 
     def test_launcher_forwards_exactly_what_the_server_parses(self):
         launched = [

@@ -15,6 +15,7 @@ where each one stands upstream:
 | Per-request sampling from headers, for clients that cannot set it in the body | `--sampling-headers` | [#618](https://github.com/incoai/splash/pull/618) |
 | A supervisor's check before every engine spawn | `--spawn-guard COMMAND` | [#637](https://github.com/incoai/splash/pull/637) |
 | llama.cpp-shaped `/slots` and `/props`, and requests pinned to a slot by `id_slot`, for proxies such as llama-swap | `--llama-cpp-compat` | [#638](https://github.com/incoai/splash/pull/638) |
+| Load a chat template from a file | `--chat-template-file FILE` | fork only |
 | Serve any model name with the local model | `--accept-any-model` | fork only |
 | Name the served model file for a supervisor | `-m` / `--model-file PATH` | fork only |
 

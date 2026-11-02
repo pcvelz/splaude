@@ -201,6 +201,12 @@ def parse_cache_dir(value):
     return Path(value).expanduser().absolute()
 
 
+def parse_chat_template_file(value):
+    if not value.strip():
+        raise argparse.ArgumentTypeError("must name a file")
+    return str(Path(value).expanduser().absolute())
+
+
 def parse_request_size(value):
     try:
         size = parse_max_memory(value)
@@ -700,6 +706,18 @@ SERVE_OPTIONS = (
             "llama-server (default: off)",
         ),
         environment="SPLASH_LLAMA_CPP_COMPAT",
+    ),
+    ServeOption(
+        "--chat-template-file",
+        "api",
+        dict(
+            type=parse_chat_template_file,
+            default=None,
+            metavar="FILE",
+            help="use the Jinja chat template in FILE instead of the one the "
+            "model carries (default: the model's own); a file that cannot be "
+            "read stops the server",
+        ),
     ),
     ServeOption(
         "--sampling-default",

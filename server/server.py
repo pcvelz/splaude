@@ -55,7 +55,7 @@ from .backend import (
     remaining_request_time,
     thinking_end_tokens,
 )
-from .chat_templates import ChatTemplateError, ChatTemplates
+from .chat_templates import ChatTemplateError, ChatTemplates, load_template_file
 from .connections import ConnectionSlots, HttpAdmission, RequestBodyReservation
 from .constraints import ConstraintFactory, validate_tokenizer
 from .diagnostics import log_unexpected, print_request, print_status
@@ -1843,6 +1843,12 @@ def main():
         tokenizer = AutoTokenizer.from_pretrained(
             model_root / "tokenizer", local_files_only=True, trust_remote_code=False
         )
+        if args.chat_template_file is not None:
+            template_digest = load_template_file(tokenizer, args.chat_template_file)
+            print_status(
+                f"Chat template file · {args.chat_template_file} · "
+                f"sha256 {template_digest}"
+            )
         validate_tokenizer(tokenizer, family.chat_format)
         thinking_end = thinking_end_tokens(
             tokenizer, args.thinking_end_text, family.chat_format

@@ -32,15 +32,19 @@ state before it. No chat format's markers are assumed.
 
 Requests and the probe share the reasoning efforts, template options and
 alias retry defined here, so the probe renders exactly as requests do.
-Tokenizer files and the tokenizer object are never modified.
+Tokenizer files and the tokenizer object are never modified, except by
+--chat-template-file, which replaces the template before the probe (see
+load_template_file).
 """
 
+import hashlib
 import json
 import re
 import sys
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 from jinja2 import Environment, TemplateError, TemplateSyntaxError, nodes
 from jinja2.ext import Extension
@@ -183,6 +187,23 @@ class ChatTemplate:
         key = _generation_key(options)
         found = self.generation_prompts.get(key)
         return found if found is not None else self.probe(key)
+
+
+def load_template_file(tokenizer, path):
+    """Replace the tokenizer's chat template with the text of the file at
+    `path` (--chat-template-file) and return its sha256. A file that cannot
+    be read, or is empty, is an error: the model's own template is never
+    served in its place without saying so."""
+    try:
+        text = Path(path).read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError) as error:
+        raise ChatTemplateError(
+            f"--chat-template-file {path}: cannot read it: {error}"
+        ) from None
+    if not text.strip():
+        raise ChatTemplateError(f"--chat-template-file {path}: the file is empty")
+    tokenizer.chat_template = text
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 class ChatTemplates:
