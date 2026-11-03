@@ -26,7 +26,8 @@ APPCAST_URL = f"{RELEASES}/latest/download/appcast.xml"
 # (docs/package.md, Updates): the app takes an update whose disk image the
 # private half signed or, to replace a lost key, one signed with the app's
 # Developer ID. Without it, the app checks for no update.
-SPARKLE_PUBLIC_KEY = "QAOqAR9iWlOPmkqq0XgbaAPjP8Y/X0lJwfd+W4a9kSc="
+# The fork's own key (2026-11-03), not upstream's: upstream's private half is not ours.
+SPARKLE_PUBLIC_KEY = "y4loCrTyq89LGPoo52abLh447TDMg0naVIVouUNCOX8="
 # The code Sparkle.framework holds besides its library, which installs an
 # update: the installer and the app that shows its progress.
 SPARKLE_HELPERS = ("Versions/B/Autoupdate", "Versions/B/Updater.app")
