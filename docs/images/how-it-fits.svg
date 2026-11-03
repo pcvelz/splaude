@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 612" width="960" height="612" role="img" aria-labelledby="hif-title hif-desc">
+  <title id="hif-title">How Splaude fits: Claude Code to Splaude to the supported models</title>
+  <desc id="hif-desc">Claude Code, drawn as a terminal window with its tool loop, hooks and subagents, connects through the Anthropic Messages API to Splaude, with 1.8 to 3.2 seconds to first token on warm turns. Splaude is drawn as a die in teal line art: Claude Code options as an orange strip on the side facing Claude Code, DFlash2 decoding as tiles across the top, Metal kernels as a grid of small tiles and SSD expert streaming as nested blocks. Above it, the Splaude claims: up to 2.9 times faster prose decode at 2k to 60k context, bars Splaude 29.4 against plain llama.cpp 10.3 tokens per second at 2k; cold 60k-token prompt, shorter is better, Splaude about 350 seconds against llama.cpp about 780 seconds. Directly below Splaude, in grey with no connections, llama.cpp as the comparison reference only. The six models are bubbles whose area is total parameters with a solid core for the parameters active per token: Qwen3.8-27B 27B dense; Qwen3.6-35B-A3B 35B total, 3B active; Ornith-1.5-122B 122B, active count not listed; Qwen3.8-Flash-Next 125B total, 6B active; Flint 39.8B total, about 2.5B active; Ternary Bonsai 2 27B dense.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-variant-numeric: tabular-nums; }
+    text.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+  </style>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#111827"/>
+    </marker>
+    <linearGradient id="line" gradientUnits="userSpaceOnUse" x1="360" y1="262" x2="610" y2="492">
+      <stop offset="0" stop-color="#0ea5c6"/>
+      <stop offset="1" stop-color="#7ff3ff"/>
+    </linearGradient>
+    <filter id="glow" x="-5%" y="-5%" width="110%" height="110%">
+      <feGaussianBlur stdDeviation="1.1" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="vhatch" width="4" height="4" patternUnits="userSpaceOnUse"><line x1="2" y1="0" x2="2" y2="4" stroke="#2cc3d9" stroke-width="0.7"/></pattern>
+    <pattern id="hhatch" width="4" height="4" patternUnits="userSpaceOnUse"><line x1="0" y1="2" x2="4" y2="2" stroke="#2cc3d9" stroke-width="0.7"/></pattern>
+    <pattern id="ohatch" width="4" height="4" patternUnits="userSpaceOnUse"><line x1="0" y1="2" x2="4" y2="2" stroke="#e8875f" stroke-width="0.7"/></pattern>
+    <pattern id="gpu" width="12" height="12" patternUnits="userSpaceOnUse"><rect x="1.5" y="1.5" width="9" height="9" fill="none" stroke="#4dd9ec" stroke-width="0.6"/><rect x="3.5" y="3.5" width="5" height="2.5" fill="none" stroke="#4dd9ec" stroke-width="0.4"/><line x1="3.5" y1="8" x2="8.5" y2="8" stroke="#4dd9ec" stroke-width="0.4"/></pattern>
+  </defs>
+  <rect x="0" y="0" width="960" height="612" fill="#ffffff"/>
+
+  <!-- Claims block, directly above Splaude, same column -->
+  <rect x="360" y="12" width="250" height="236" rx="14" fill="#ffffff" stroke="#0e7490" stroke-width="1.5"/>
+  <text x="376" y="34" font-size="11" font-weight="800" letter-spacing="1.2" fill="#155e75">SPLAUDE</text>
+  <text x="376" y="70"><tspan font-size="14" font-weight="700" fill="#155e75">up to </tspan><tspan font-size="34" font-weight="800" fill="#0e7490">2.9x</tspan><tspan font-size="17" font-weight="800" fill="#155e75"> faster</tspan></text>
+  <text x="376" y="88" font-size="11.5" fill="#374151">prose decode, 2k-60k context</text>
+  <rect x="376" y="96" width="218" height="18" rx="3" fill="#eef0f3"/>
+  <rect x="376" y="96" width="213.6" height="18" rx="3" fill="#0e7490"/>
+  <text x="382" y="109" font-size="11" font-weight="700" fill="#ffffff">Splaude</text>
+  <text x="586" y="109" text-anchor="end" font-size="11" font-weight="700" fill="#ffffff">29.4 tok/s at 2k</text>
+  <rect x="376" y="118" width="218" height="18" rx="3" fill="#eef0f3"/>
+  <rect x="376" y="118" width="74.8" height="18" rx="3" fill="#b8bec7"/>
+  <text x="382" y="131" font-size="11" fill="#1f2937">llama.cpp</text>
+  <text x="457" y="131" font-size="11" fill="#4b5563">10.3 tok/s</text>
+  <text x="376" y="172"><tspan font-size="30" font-weight="800" fill="#0e7490">~350 s</tspan><tspan font-size="13" font-weight="700" fill="#155e75"> cold 60k prompt</tspan></text>
+  <text x="376" y="190" font-size="11.5" fill="#374151">seconds, shorter is better</text>
+  <rect x="376" y="198" width="218" height="18" rx="3" fill="#eef0f3"/>
+  <rect x="376" y="198" width="95.4" height="18" rx="3" fill="#0e7490"/>
+  <text x="382" y="211" font-size="11" font-weight="700" fill="#ffffff">Splaude</text>
+  <text x="477" y="211" font-size="11" font-weight="700" fill="#155e75">~350 s</text>
+  <rect x="376" y="220" width="218" height="18" rx="3" fill="#eef0f3"/>
+  <rect x="376" y="220" width="212.6" height="18" rx="3" fill="#b8bec7"/>
+  <text x="382" y="233" font-size="11" fill="#1f2937">llama.cpp</text>
+  <text x="584" y="233" text-anchor="end" font-size="11" fill="#1f2937">~780 s</text>
+  <line x1="485" y1="248" x2="485" y2="262" stroke="#0e7490" stroke-width="2"/>
+
+  <!-- Claude Code, as a terminal window in Claude's warm orange -->
+  <rect x="20" y="287" width="220" height="180" rx="12" fill="#D97757"/>
+  <rect x="22" y="315" width="216" height="150" rx="10" fill="#262624"/>
+  <rect x="22" y="315" width="216" height="16" fill="#262624"/>
+  <circle cx="36" cy="301" r="4.5" fill="#fbe9e1"/>
+  <circle cx="50" cy="301" r="4.5" fill="#fbe9e1"/>
+  <circle cx="64" cy="301" r="4.5" fill="#fbe9e1"/>
+  <text x="140" y="306" text-anchor="middle" font-size="13.5" font-weight="800" fill="#2b1609">Claude Code</text>
+  <text class="mono" xml:space="preserve" x="32" y="343" font-size="12"><tspan fill="#f0a07f">&gt;</tspan><tspan fill="#f5f4ef"> fix the failing test</tspan></text>
+  <text class="mono" xml:space="preserve" x="32" y="369" font-size="11.5"><tspan fill="#a8a29e">tool loop </tspan><tspan fill="#f5f4ef">Read Edit Bash</tspan></text>
+  <text class="mono" xml:space="preserve" x="32" y="391" font-size="11.5"><tspan fill="#a8a29e">hooks     </tspan><tspan fill="#f5f4ef">every tool call</tspan></text>
+  <text class="mono" xml:space="preserve" x="32" y="413" font-size="11.5"><tspan fill="#a8a29e">subagents </tspan><tspan fill="#f5f4ef">in parallel</tspan></text>
+  <text class="mono" xml:space="preserve" x="32" y="445" font-size="12"><tspan fill="#f0a07f">&gt;</tspan><tspan fill="#f5f4ef"> _</tspan></text>
+
+  <!-- API link, with the warm time to first token -->
+  <line x1="244" y1="377" x2="357" y2="377" stroke="#111827" stroke-width="2.5" marker-start="url(#arr)" marker-end="url(#arr)"/>
+  <text x="297" y="345" text-anchor="middle" font-size="13" font-weight="600" fill="#111827">Anthropic</text>
+  <text x="297" y="361" text-anchor="middle" font-size="13" font-weight="600" fill="#111827">Messages API</text>
+  <text x="297" y="405" text-anchor="middle" font-size="21" font-weight="800" fill="#0e7490">1.8-3.2 s</text>
+  <text x="297" y="422" text-anchor="middle" font-size="11.5" font-weight="600" fill="#155e75">first token,</text>
+  <text x="297" y="436" text-anchor="middle" font-size="11.5" font-weight="600" fill="#155e75">warm turns</text>
+
+  <!-- Splaude, as a die: black die, thin glowing teal line art, our own floorplan -->
+  <rect x="360" y="262" width="250" height="230" rx="14" fill="#000000"/>
+  <g fill="none" stroke="url(#line)" filter="url(#glow)">
+    <rect x="360.75" y="262.75" width="248.5" height="228.5" rx="13.5" stroke-width="1.5"/>
+    <rect x="368" y="270" width="234" height="214" rx="5" stroke-width="1"/>
+    <rect x="412" y="300" width="182" height="72" stroke-width="1"/>
+    <rect x="414" y="302" width="26" height="68" fill="url(#vhatch)" stroke-width="0.8"/>
+    <rect x="444" y="302" width="26" height="68" fill="url(#vhatch)" stroke-width="0.8"/>
+    <rect x="474" y="302" width="26" height="68" fill="url(#vhatch)" stroke-width="0.8"/>
+    <rect x="504" y="302" width="26" height="68" fill="url(#vhatch)" stroke-width="0.8"/>
+    <rect x="534" y="302" width="26" height="68" fill="url(#vhatch)" stroke-width="0.8"/>
+    <rect x="564" y="302" width="26" height="68" fill="url(#vhatch)" stroke-width="0.8"/>
+    <rect x="414" y="378" width="104" height="98" stroke-width="1"/>
+    <rect x="418" y="382" width="96" height="90" fill="url(#gpu)" stroke-width="0.6"/>
+    <rect x="524" y="378" width="70" height="98" stroke-width="1"/>
+    <rect x="528" y="382" width="62" height="28" fill="url(#vhatch)" stroke-width="0.8"/>
+    <rect x="528" y="414" width="29" height="28" stroke-width="0.8"/>
+    <rect x="532" y="418" width="21" height="20" stroke-width="0.5"/>
+    <rect x="561" y="414" width="29" height="28" fill="url(#hhatch)" stroke-width="0.8"/>
+    <rect x="528" y="446" width="62" height="26" stroke-width="0.8"/>
+    <rect x="532" y="450" width="54" height="18" stroke-width="0.5"/>
+  </g>
+  <g fill="none" stroke="#e8875f" filter="url(#glow)">
+    <rect x="376" y="300" width="32" height="176" stroke-width="1"/>
+    <rect x="380" y="304" width="24" height="40" fill="url(#ohatch)" stroke-width="0.8"/>
+    <rect x="380" y="348" width="24" height="60" stroke-width="0.8"/>
+    <rect x="384" y="352" width="16" height="52" stroke-width="0.5"/>
+    <rect x="380" y="412" width="24" height="60" fill="url(#ohatch)" stroke-width="0.8"/>
+  </g>
+  <text x="485" y="291" text-anchor="middle" font-size="15" font-weight="800" fill="url(#line)" letter-spacing="0.4">Splaude</text>
+  <g transform="translate(392 388) rotate(-90)">
+    <rect x="-52" y="-8" width="104" height="16" rx="2" fill="#000000"/>
+    <text x="0" y="3.5" text-anchor="middle" font-size="9" font-weight="700" fill="#f0a07f">Claude Code options</text>
+  </g>
+  <rect x="458" y="328" width="90" height="16" rx="2" fill="#000000"/>
+  <text x="503" y="339.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#a5f3fc">DFlash2 decoding</text>
+  <rect x="432" y="419" width="68" height="16" rx="2" fill="#000000"/>
+  <text x="466" y="430.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#a5f3fc">Metal kernels</text>
+  <rect x="529" y="404" width="60" height="38" rx="2" fill="#000000"/>
+  <text x="559" y="415" text-anchor="middle" font-size="9" font-weight="700" fill="#a5f3fc">SSD</text>
+  <text x="559" y="426" text-anchor="middle" font-size="9" font-weight="700" fill="#a5f3fc">expert</text>
+  <text x="559" y="437" text-anchor="middle" font-size="9" font-weight="700" fill="#a5f3fc">streaming</text>
+
+  <!-- llama.cpp: directly below Splaude, same width, plain outline, no lines -->
+  <rect x="360" y="508" width="250" height="64" rx="12" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <text x="485" y="536" text-anchor="middle" font-size="17" font-weight="700" fill="#4b5563">llama.cpp</text>
+  <text x="485" y="558" text-anchor="middle" font-size="12.5" fill="#4b5563">comparison reference only</text>
+
+  <!-- Links from the chip to the model bubbles -->
+  <g stroke="#0e7490" stroke-width="2" fill="none">
+    <path d="M610 377 C 658 377, 658 229, 711.1 229"/>
+    <path d="M610 377 C 658 377, 658 273, 709.1 273"/>
+    <path d="M610 377 C 658 377, 658 332.5, 695.4 332.5"/>
+    <path d="M610 377 C 658 377, 658 406, 695 406"/>
+    <path d="M610 377 C 658 377, 658 467, 708.1 467"/>
+    <path d="M610 377 C 658 377, 658 512, 711.1 512"/>
+  </g>
+
+  <!-- Models as size bubbles: area = total parameters, solid core = active per token -->
+  <circle cx="725" cy="229" r="13.9" fill="#0e7490"/>
+  <circle cx="725" cy="273" r="15.9" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <circle cx="725" cy="273" r="4.6" fill="#0e7490"/>
+  <circle cx="725" cy="332.5" r="29.6" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <circle cx="725" cy="332.5" r="7" fill="none" stroke="#8a929e" stroke-width="1.2" stroke-dasharray="2 2"/>
+  <circle cx="725" cy="406" r="30" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <circle cx="725" cy="406" r="6.6" fill="#0e7490"/>
+  <circle cx="725" cy="467" r="16.9" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <circle cx="725" cy="467" r="4.2" fill="#0e7490"/>
+  <circle cx="725" cy="512" r="13.9" fill="#c2410c"/>
+  <g font-size="13" font-weight="700" fill="#111827">
+    <text x="765" y="227">Qwen3.8-27B</text>
+    <text x="765" y="271">Qwen3.6-35B-A3B</text>
+    <text x="765" y="330.5">Ornith-1.5-122B</text>
+    <text x="765" y="404">Qwen3.8-Flash-Next</text>
+    <text x="765" y="465">Flint</text>
+    <text x="765" y="510">Ternary Bonsai 2</text>
+  </g>
+  <g font-size="11" font-weight="600" fill="#155e75">
+    <text x="765" y="242">27B, dense</text>
+    <text x="765" y="286">35B total, 3B active</text>
+    <text x="765" y="345.5" fill="#4b5563">122B, active not listed</text>
+    <text x="765" y="419">125B total, 6B active</text>
+    <text x="765" y="480">39.8B total, ~2.5B active</text>
+    <text x="765" y="525">27B, dense, PQ2_0</text>
+  </g>
+  <circle cx="700" cy="570" r="6" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <text x="712" y="574" font-size="11" fill="#374151">area: total parameters</text>
+  <circle cx="842" cy="570" r="6" fill="#0e7490"/>
+  <text x="854" y="574" font-size="11" fill="#374151">active per token</text>
+
+  <!-- Footnote -->
+  <text x="20" y="600" font-size="11" fill="#4b5563">Speed bars: Splaude (Splash + Claude Code) vs plain llama.cpp, same model and weights (Qwen3.8-27B UD-Q4_K_XL), measured on an M4 Pro with 48 GB.</text>
+</svg>

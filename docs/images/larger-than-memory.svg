@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 316" width="960" height="316" role="img" aria-labelledby="lm-title lm-desc">
+  <title id="lm-title">Models larger than memory</title>
+  <desc id="lm-desc">A model does not have to fit in memory: Splaude streams the experts it is not using from the SSD. Qwen3.8-Flash-Next GSQ-RCO IQ3_S is 83.6 GB. llama.cpp keeps the whole model in memory, 83.6 GB; it was not run on this model, and its bar is the memory it would hold. Splaude streams experts from the SSD and runs it in 48 GB, at a median decode of 23.5 to 29.5 tokens per second over four full Claude Code runs on real repositories. Measured on an M4 Pro with 48 GB.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-variant-numeric: tabular-nums; }
+  </style>
+  <rect x="0" y="0" width="960" height="316" fill="#ffffff"/>
+  <text x="20" y="36" font-size="24" font-weight="800" fill="#111827">Models larger than memory</text>
+  <text x="20" y="60" font-size="13" fill="#374151">A model does not have to fit in memory: Splaude streams the experts it is not using from the SSD.</text>
+
+  <!-- Memory comparison -->
+  <rect x="20" y="76" width="560" height="176" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="36" y="104" font-size="16" font-weight="700" fill="#111827">Memory to run it</text>
+  <text x="36" y="124" font-size="12" fill="#4b5563">GB, scale 0 to 90</text>
+  <text x="112" y="153" text-anchor="end" font-size="12.5" fill="#374151">llama.cpp</text>
+  <rect x="120" y="140" width="371.6" height="18" rx="3" fill="#c4c9d0"/>
+  <text x="498" y="153" font-size="12.5" font-weight="700" fill="#4b5563">83.6 GB</text>
+  <text x="120" y="176" font-size="12" fill="#4b5563">llama.cpp: keeps the whole model in memory</text>
+  <text x="112" y="205" text-anchor="end" font-size="12.5" font-weight="700" fill="#155e75">Splaude</text>
+  <rect x="120" y="192" width="213.3" height="18" rx="3" fill="#0e7490"/>
+  <text x="340" y="205" font-size="12.5" font-weight="700" fill="#155e75">48 GB</text>
+  <text x="120" y="228" font-size="12" font-weight="600" fill="#155e75">Splaude: streams experts from the SSD</text>
+
+  <!-- Speed while streaming -->
+  <rect x="600" y="76" width="340" height="176" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="616" y="104" font-size="16" font-weight="700" fill="#111827">Speed while streaming</text>
+  <text x="616" y="148" font-size="34" font-weight="800" fill="#155e75">23.5 to 29.5 tok/s</text>
+  <text x="616" y="176" font-size="12" fill="#4b5563">median decode over four full Claude Code runs</text>
+  <text x="616" y="193" font-size="12" fill="#4b5563">on real repositories.</text>
+
+  <text x="20" y="280" font-size="11" fill="#4b5563">Measured on an M4 Pro with 48 GB: Qwen3.8-Flash-Next GSQ-RCO IQ3_S (83.6 GB) through multi-hour Claude Code sessions.</text>
+  <text x="20" y="296" font-size="11" fill="#4b5563">llama.cpp was not run on this model; its bar is the memory it would hold. Details: docs/claude-code-benchmarks.md</text>
+</svg>

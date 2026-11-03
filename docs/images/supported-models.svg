@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" width="960" height="440" role="img" aria-labelledby="sm-title sm-desc">
+  <title id="sm-title">Supported models, sized by parameters</title>
+  <desc id="sm-desc">Each bubble's area is the model's total parameters; its solid core is the parameters active per token. Qwen3.8-27B: 27B, dense. Qwen3.6-35B-A3B: 35B total, 3B active. Ornith-1.5-122B: 122B total, mixture of experts, active count not listed. Qwen3.8-Flash-Next: 125B total, 6B active. Flint: 39.8B total, about 2.5B active. Prism ML Ternary Bonsai 2: 27B, dense.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-variant-numeric: tabular-nums; }
+  </style>
+  <rect x="0" y="0" width="960" height="440" fill="#ffffff"/>
+  <text x="20" y="36" font-size="24" font-weight="800" fill="#111827">Supported models</text>
+  <text x="20" y="60" font-size="13" fill="#374151">The list is short because each model is tuned individually: it comes with a small helper model that guesses the next words ahead, and</text>
+  <text x="20" y="77" font-size="13" fill="#374151">GPU code written for that model's exact shape. Bubble area is the total parameters; the solid core is the parameters active per token.</text>
+  <circle cx="28" cy="100" r="8" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <text x="42" y="104" font-size="12.5" fill="#374151">total parameters</text>
+  <circle cx="160" cy="100" r="8" fill="#0e7490"/>
+  <text x="174" y="104" font-size="12.5" fill="#374151">active per token</text>
+
+  <!-- bubbles: radius = 6.26 x sqrt(billions), centres every 160 px -->
+  <circle cx="80" cy="200" r="32.5" fill="#0e7490"/>
+  <circle cx="240" cy="200" r="37" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <circle cx="240" cy="200" r="10.8" fill="#0e7490"/>
+  <circle cx="400" cy="200" r="69.1" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <circle cx="400" cy="200" r="16" fill="none" stroke="#8a929e" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <text x="400" y="232" text-anchor="middle" font-size="12" fill="#4b5563">active</text>
+  <text x="400" y="246" text-anchor="middle" font-size="12" fill="#4b5563">not listed</text>
+  <circle cx="560" cy="200" r="70" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <circle cx="560" cy="200" r="15.3" fill="#0e7490"/>
+  <circle cx="720" cy="200" r="39.5" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+  <circle cx="720" cy="200" r="9.9" fill="#0e7490"/>
+  <circle cx="880" cy="200" r="32.5" fill="#c2410c"/>
+
+  <g font-size="14" font-weight="700" fill="#111827" text-anchor="middle">
+    <text x="80" y="296">Qwen3.8-27B</text>
+    <text x="240" y="296">Qwen3.6-35B-A3B</text>
+    <text x="400" y="296">Ornith-1.5-122B</text>
+    <text x="560" y="296">Qwen3.8-Flash-Next</text>
+    <text x="720" y="296">Flint</text>
+    <text x="880" y="296">Ternary Bonsai 2</text>
+  </g>
+  <g font-size="12.5" font-weight="600" fill="#155e75" text-anchor="middle">
+    <text x="80" y="314">27B, dense</text>
+    <text x="240" y="314">35B total, 3B active</text>
+    <text x="400" y="314">122B total, MoE</text>
+    <text x="560" y="314">125B total, 6B active</text>
+    <text x="720" y="314">39.8B total, ~2.5B active</text>
+    <text x="880" y="314">27B, dense</text>
+  </g>
+  <g font-size="12" fill="#4b5563" text-anchor="middle">
+    <text x="80" y="331">GGUF or MLX 4-bit;</text>
+    <text x="80" y="346">benchmarked against</text>
+    <text x="80" y="361">llama.cpp</text>
+    <text x="240" y="331">GGUF or MLX 4-bit</text>
+    <text x="400" y="331">GGUF or MLX 4-bit</text>
+    <text x="560" y="331">GGUF</text>
+    <text x="720" y="331">GGUF</text>
+    <text x="880" y="331">PQ2_0, 7.2 GB, vision</text>
+  </g>
+
+  <text x="20" y="388" font-size="13" fill="#374151">Each model loads in many sizes, 1-bit to 8-bit GGUF and 2-bit to 8-bit MLX, so smaller Macs can run a smaller version. Full list: docs/models.md.</text>
+  <text x="20" y="410" font-size="11" fill="#4b5563">Parameter counts: model names and Hugging Face model cards. Ornith-1.5-122B: a 122B mixture-of-experts model, no active count given. Qwen3.8-Flash-Next: 125B</text>
+  <text x="20" y="426" font-size="11" fill="#4b5563">with 6B activated, plus a 51B n-gram embedding and a 4B MTP head. Flint: 39.8B total, about 2.5B active. Qwen3.8-27B is dense; Ternary Bonsai 2 (Prism ML) is built on it.</text>
+</svg>

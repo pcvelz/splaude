@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 532" width="960" height="532" role="img" aria-labelledby="ds-title ds-desc">
+  <title id="ds-title">Decode speed vs llama.cpp</title>
+  <desc id="ds-desc">Decode tokens per second with the prompt cached. Prose: at 2k context llama.cpp 10.3, llama.cpp with MTP 15.0, Splaude 29.4; at 20k 9.5, 12.6, 26.9; at 60k 8.3, 9.3, 23.8. Copy: at 2k 10.4, 38.8, 36.6; at 20k 9.5, 33.9, 33.8; at 60k 8.4, 28.3, 36.2. Copy-heavy output: llama.cpp with its MTP draft is level or slightly ahead up to 20k context.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-variant-numeric: tabular-nums; }
+  </style>
+  <rect x="0" y="0" width="960" height="532" fill="#ffffff"/>
+  <text x="20" y="36" font-size="24" font-weight="800" fill="#111827">Decode speed vs llama.cpp</text>
+  <text x="20" y="60" font-size="13" fill="#374151">Tokens per second while generating about 500 tokens, with the prompt already cached, at three context depths. Prose is free text;</text>
+  <text x="20" y="77" font-size="13" fill="#374151">copy repeats text from the prompt, as code edits do. Higher is better.</text>
+  <rect x="20" y="92" width="14" height="14" rx="3" fill="#c4c9d0"/>
+  <text x="40" y="104" font-size="12.5" fill="#374151">llama.cpp</text>
+  <rect x="120" y="92" width="14" height="14" rx="3" fill="#8a929e"/>
+  <text x="140" y="104" font-size="12.5" fill="#374151">llama.cpp + MTP draft</text>
+  <rect x="290" y="92" width="14" height="14" rx="3" fill="#0e7490"/>
+  <text x="310" y="104" font-size="12.5" fill="#374151">Splaude (Splash engine, DFlash2 draft)</text>
+
+  <!-- Prose panel -->
+  <rect x="20" y="118" width="450" height="328" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="36" y="144" font-size="16" font-weight="700" fill="#111827">Prose</text>
+  <text x="36" y="172" font-size="13" font-weight="700" fill="#111827">2k context</text>
+  <text x="456" y="172" text-anchor="end" font-size="12" font-weight="600" fill="#155e75">2.9x vs llama.cpp, 2.0x vs MTP</text>
+  <g font-size="12">
+    <text x="124" y="193" text-anchor="end" fill="#374151">llama.cpp</text>
+    <rect x="132" y="180" width="66.95" height="16" rx="3" fill="#c4c9d0"/><text x="205" y="193" font-weight="700" fill="#4b5563">10.3</text>
+    <text x="124" y="215" text-anchor="end" fill="#374151">llama.cpp + MTP</text>
+    <rect x="132" y="202" width="97.5" height="16" rx="3" fill="#8a929e"/><text x="236" y="215" font-weight="700" fill="#4b5563">15.0</text>
+    <text x="124" y="237" text-anchor="end" font-weight="700" fill="#155e75">Splaude</text>
+    <rect x="132" y="224" width="191.1" height="16" rx="3" fill="#0e7490"/><text x="329" y="237" font-weight="700" fill="#155e75">29.4</text>
+  </g>
+  <text x="36" y="270" font-size="13" font-weight="700" fill="#111827">20k context</text>
+  <text x="456" y="270" text-anchor="end" font-size="12" font-weight="600" fill="#155e75">2.8x vs llama.cpp, 2.1x vs MTP</text>
+  <g font-size="12">
+    <text x="124" y="291" text-anchor="end" fill="#374151">llama.cpp</text>
+    <rect x="132" y="278" width="61.75" height="16" rx="3" fill="#c4c9d0"/><text x="200" y="291" font-weight="700" fill="#4b5563">9.5</text>
+    <text x="124" y="313" text-anchor="end" fill="#374151">llama.cpp + MTP</text>
+    <rect x="132" y="300" width="81.9" height="16" rx="3" fill="#8a929e"/><text x="220" y="313" font-weight="700" fill="#4b5563">12.6</text>
+    <text x="124" y="335" text-anchor="end" font-weight="700" fill="#155e75">Splaude</text>
+    <rect x="132" y="322" width="174.85" height="16" rx="3" fill="#0e7490"/><text x="313" y="335" font-weight="700" fill="#155e75">26.9</text>
+  </g>
+  <text x="36" y="368" font-size="13" font-weight="700" fill="#111827">60k context</text>
+  <text x="456" y="368" text-anchor="end" font-size="12" font-weight="600" fill="#155e75">2.9x vs llama.cpp, 2.6x vs MTP</text>
+  <g font-size="12">
+    <text x="124" y="389" text-anchor="end" fill="#374151">llama.cpp</text>
+    <rect x="132" y="376" width="53.95" height="16" rx="3" fill="#c4c9d0"/><text x="192" y="389" font-weight="700" fill="#4b5563">8.3</text>
+    <text x="124" y="411" text-anchor="end" fill="#374151">llama.cpp + MTP</text>
+    <rect x="132" y="398" width="60.45" height="16" rx="3" fill="#8a929e"/><text x="199" y="411" font-weight="700" fill="#4b5563">9.3</text>
+    <text x="124" y="433" text-anchor="end" font-weight="700" fill="#155e75">Splaude</text>
+    <rect x="132" y="420" width="154.7" height="16" rx="3" fill="#0e7490"/><text x="293" y="433" font-weight="700" fill="#155e75">23.8</text>
+  </g>
+
+  <!-- Copy panel -->
+  <rect x="490" y="118" width="450" height="328" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="506" y="144" font-size="16" font-weight="700" fill="#111827">Copy</text>
+  <text x="506" y="172" font-size="13" font-weight="700" fill="#111827">2k context</text>
+  <text x="926" y="172" text-anchor="end" font-size="12" font-weight="600" fill="#c2410c">3.5x vs llama.cpp, 0.9x vs MTP</text>
+  <g font-size="12">
+    <text x="614" y="193" text-anchor="end" fill="#374151">llama.cpp</text>
+    <rect x="622" y="180" width="67.6" height="16" rx="3" fill="#c4c9d0"/><text x="696" y="193" font-weight="700" fill="#4b5563">10.4</text>
+    <text x="614" y="215" text-anchor="end" fill="#374151">llama.cpp + MTP</text>
+    <rect x="622" y="202" width="252.2" height="16" rx="3" fill="#8a929e"/><text x="880" y="215" font-weight="700" fill="#4b5563">38.8</text>
+    <text x="614" y="237" text-anchor="end" font-weight="700" fill="#155e75">Splaude</text>
+    <rect x="622" y="224" width="237.9" height="16" rx="3" fill="#0e7490"/><text x="866" y="237" font-weight="700" fill="#155e75">36.6</text>
+  </g>
+  <text x="506" y="270" font-size="13" font-weight="700" fill="#111827">20k context</text>
+  <text x="926" y="270" text-anchor="end" font-size="12" font-weight="600" fill="#c2410c">3.6x vs llama.cpp, 1.0x vs MTP</text>
+  <g font-size="12">
+    <text x="614" y="291" text-anchor="end" fill="#374151">llama.cpp</text>
+    <rect x="622" y="278" width="61.75" height="16" rx="3" fill="#c4c9d0"/><text x="690" y="291" font-weight="700" fill="#4b5563">9.5</text>
+    <text x="614" y="313" text-anchor="end" fill="#374151">llama.cpp + MTP</text>
+    <rect x="622" y="300" width="220.35" height="16" rx="3" fill="#8a929e"/><text x="849" y="313" font-weight="700" fill="#4b5563">33.9</text>
+    <text x="614" y="335" text-anchor="end" font-weight="700" fill="#155e75">Splaude</text>
+    <rect x="622" y="322" width="219.7" height="16" rx="3" fill="#0e7490"/><text x="848" y="335" font-weight="700" fill="#155e75">33.8</text>
+  </g>
+  <text x="506" y="368" font-size="13" font-weight="700" fill="#111827">60k context</text>
+  <text x="926" y="368" text-anchor="end" font-size="12" font-weight="600" fill="#155e75">4.3x vs llama.cpp, 1.3x vs MTP</text>
+  <g font-size="12">
+    <text x="614" y="389" text-anchor="end" fill="#374151">llama.cpp</text>
+    <rect x="622" y="376" width="54.6" height="16" rx="3" fill="#c4c9d0"/><text x="683" y="389" font-weight="700" fill="#4b5563">8.4</text>
+    <text x="614" y="411" text-anchor="end" fill="#374151">llama.cpp + MTP</text>
+    <rect x="622" y="398" width="183.95" height="16" rx="3" fill="#8a929e"/><text x="812" y="411" font-weight="700" fill="#4b5563">28.3</text>
+    <text x="614" y="433" text-anchor="end" font-weight="700" fill="#155e75">Splaude</text>
+    <rect x="622" y="420" width="235.3" height="16" rx="3" fill="#0e7490"/><text x="864" y="433" font-weight="700" fill="#155e75">36.2</text>
+  </g>
+
+  <text x="20" y="474" font-size="13.5" fill="#374151">Copy-heavy output: llama.cpp with its MTP draft is level or slightly ahead up to 20k context.</text>
+
+  <text x="20" y="502" font-size="11" fill="#4b5563">Measured on an M4 Pro with 48 GB: Qwen3.8-27B UD-Q4_K_XL, the same GGUF file on both engines; llama.cpp b11493 (plain, and with its MTP draft)</text>
+  <text x="20" y="518" font-size="11" fill="#4b5563">vs Splash 1.4.0 with its DFlash2 draft. Splash figures are the mean of two warm requests; thinking was on. Details: docs/claude-code-benchmarks.md</text>
+</svg>

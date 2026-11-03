@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Splaude - Splash for Claude Code</title>
+<meta name="description" content="Splash for Claude Code. A fast local inference engine for Apple silicon, ready for Claude Code.">
+<style>
+  :root {
+    --ink: #111827;
+    --ink-soft: #374151;
+    --muted: #4b5563;
+    --line: #e5e7eb;
+    --splaude: #0e7490;
+    --splaude-dark: #155e75;
+    --splaude-tint: #ecfeff;
+    --accent: #c2410c;
+    --grey-1: #c4c9d0;
+    --grey-2: #8a929e;
+    --grey-bg: #f3f4f6;
+  }
+  html, body { background: #ffffff; margin: 0; padding: 0; }
+  body {
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+  }
+  svg text { font-family: inherit; font-variant-numeric: tabular-nums; }
+  svg text.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+  a { color: var(--splaude-dark); }
+  a:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+  header.hero { padding: 56px 0 24px; border-bottom: 1px solid var(--line); }
+  .eyebrow { color: var(--splaude-dark); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; font-size: 13px; margin: 0 0 8px; }
+  h1 { font-size: clamp(40px, 7vw, 64px); line-height: 1.05; margin: 0 0 12px; letter-spacing: -.02em; }
+  h1 span { color: var(--splaude); }
+  .tagline { font-size: clamp(18px, 2.4vw, 22px); color: var(--ink-soft); margin: 0 0 20px; max-width: 46em; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 28px; }
+  .btn { display: inline-block; padding: 9px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; border: 2px solid var(--splaude); }
+  .btn.primary { background: var(--splaude); color: #fff; }
+  .btn.secondary { background: #fff; color: var(--splaude-dark); }
+  section { padding: 44px 0 8px; }
+  h2 { font-size: clamp(24px, 3.4vw, 30px); margin: 0 0 8px; letter-spacing: -.01em; }
+  h3 { font-size: 19px; margin: 0 0 4px; }
+  .lede { color: var(--ink-soft); margin: 0 0 22px; max-width: 46em; }
+  figure { margin: 0; }
+  figcaption { color: var(--muted); font-size: 14px; margin-top: 10px; }
+
+  /* Diagram: wide layout by default, tall layout on narrow screens */
+  .diagram { border: 1px solid var(--line); border-radius: 14px; padding: 16px; background: #fff; }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  .dia-tall { display: none !important; }
+  @media (max-width: 640px) {
+    .dia-wide { display: none !important; }
+    .dia-tall { display: block !important; max-width: 420px; margin: 0 auto; }
+    .diagram { padding: 8px; }
+  }
+
+  /* Models */
+  .models { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; list-style: none; margin: 0; padding: 0; }
+  .models li { border: 1px solid var(--line); border-left: 5px solid var(--splaude); border-radius: 10px; padding: 14px 16px; background: #fff; }
+  .models li.extra { border-left-color: var(--accent); }
+  .models .name { font-weight: 700; font-size: 17px; display: block; }
+  .models .meta { font-size: 14px; color: var(--muted); display: block; margin-top: 4px; }
+  .models code { font-size: 12.5px; background: var(--grey-bg); padding: 1px 4px; border-radius: 4px; word-break: break-all; }
+  .bubbles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 14px; list-style: none; margin: 0; padding: 0; }
+  .bubbles li { text-align: center; }
+  .bubbles svg { display: block; width: 190px; height: 190px; margin: 0 auto 6px; }
+  .bubbles .name { display: block; font-weight: 700; font-size: 16px; }
+  .bubbles .size { display: block; font-size: 14px; font-weight: 600; color: var(--splaude-dark); }
+  .bubbles .meta { display: block; font-size: 13.5px; color: var(--muted); }
+  .bubble-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; list-style: none; margin: 0 0 18px; padding: 0; font-size: 14px; color: var(--ink-soft); }
+  .bubble-legend li { display: flex; align-items: center; gap: 7px; }
+  .bubble-legend svg { width: 18px; height: 18px; }
+  .note { font-size: 15px; color: var(--ink-soft); margin-top: 16px; max-width: 52em; }
+
+  /* Bar charts (HTML/CSS bars, values always printed as text) */
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 18px; padding: 0; list-style: none; font-size: 14px; color: var(--ink-soft); }
+  .legend li { display: flex; align-items: center; gap: 7px; }
+  .sw { width: 16px; height: 16px; border-radius: 3px; display: inline-block; flex: none; }
+  .sw.g1 { background: var(--grey-1); }
+  .sw.g2 { background: var(--grey-2); }
+  .sw.sp { background: var(--splaude); }
+  .sw.mem { background: #fff; border: 2px dashed var(--grey-2); width: 12px; height: 12px; }
+  .chart { border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 8px; background: #fff; }
+  .group { margin: 0 0 18px; }
+  .group-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; align-items: baseline; margin: 0 0 6px; }
+  .group-title { font-weight: 700; font-size: 15px; }
+  .group-ratio { font-size: 14px; color: var(--splaude-dark); font-weight: 600; }
+  .group-ratio.tie { color: var(--accent); }
+  .row { display: grid; grid-template-columns: 9.5em 1fr; gap: 10px; align-items: center; margin: 3px 0; }
+  .row .lab { font-size: 14px; color: var(--ink-soft); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track { display: flex; align-items: center; min-width: 0; }
+  .bar { height: 20px; border-radius: 0 4px 4px 0; width: calc((100% - 4.6em) * var(--f)); min-width: 2px; flex: none; }
+  .bar.g1 { background: var(--grey-1); }
+  .bar.g2 { background: var(--grey-2); }
+  .bar.sp { background: var(--splaude); }
+  .bar.mem { background: #fff; border: 2px dashed var(--grey-2); height: 16px; }
+  .val { font-size: 14px; font-weight: 700; padding-left: 8px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .row.splaude .lab { color: var(--splaude-dark); font-weight: 700; }
+  .rownote { margin: 0 0 10px 171px; font-size: 13px; line-height: 1.35; }
+  .rownote.grey { color: var(--muted); }
+  .rownote.splaude { color: var(--splaude-dark); font-weight: 600; }
+  .row.splaude .val { color: var(--splaude-dark); }
+  .row.grey .val { color: var(--muted); }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .callout { border-left: 4px solid var(--accent); background: #fff7ed; padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 18px 0 0; font-size: 15px; color: var(--ink); }
+  .callout strong { color: var(--accent); }
+  .axis-note { font-size: 13px; color: var(--muted); margin: -4px 0 14px; }
+
+  /* Footer */
+  footer { margin-top: 48px; border-top: 1px solid var(--line); padding: 32px 0 48px; }
+  footer h2 { font-size: 22px; }
+  table.setup { border-collapse: collapse; width: 100%; font-size: 15px; margin: 8px 0 22px; }
+  table.setup th, table.setup td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.setup thead th { color: var(--muted); font-weight: 600; font-size: 14px; }
+  table.setup tbody th { font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+  .table-scroll { overflow-x: auto; }
+  footer ul { padding-left: 20px; margin: 6px 0 18px; }
+  footer li { margin: 4px 0; font-size: 15px; color: var(--ink-soft); }
+  .fine { font-size: 14px; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .models { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    header.hero { padding-top: 36px; }
+    .split { grid-template-columns: 1fr; }
+    .models { grid-template-columns: 1fr; }
+    .bubbles { grid-template-columns: repeat(2, 1fr); }
+    .bubbles svg { width: 128px; height: 128px; }
+    .row { grid-template-columns: 7.4em 1fr; gap: 8px; }
+    .row .lab { font-size: 13px; }
+    .rownote { margin-left: 126px; font-size: 12.5px; }
+    .chart { padding: 14px 12px 4px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Splaude</p>
+    <h1>Splash for <span>Claude Code</span>.</h1>
+    <p class="tagline">A fast local inference engine for Apple silicon, ready for Claude Code. Splaude is a fork of <a href="https://github.com/incoai/splash">Splash</a> with the server options Claude Code needs.</p>
+    <p class="links">
+      <a class="btn primary" href="https://github.com/pcvelz/splaude">Source on GitHub</a>
+      <a class="btn secondary" href="claude-code-benchmarks.md">Benchmark details</a>
+    </p>
+  </div>
+</header>
+
+<main>
+<section aria-labelledby="h-arch">
+  <div class="wrap">
+    <h2 id="h-arch">How it fits</h2>
+    <p class="lede">Claude Code talks to Splaude over the Anthropic Messages API, with its full harness intact: the tool loop, hooks and subagents. Splaude serves the model locally. llama.cpp appears only as the yardstick for the numbers below.</p>
+    <figure class="diagram">
+      <!-- Wide layout -->
+      <svg class="dia-wide" viewBox="0 0 960 590" role="img" aria-labelledby="dia-wide-title dia-wide-desc">
+        <title id="dia-wide-title">Architecture: Claude Code to Splaude to the supported models</title>
+        <desc id="dia-wide-desc">Claude Code, with its tool loop, hooks and subagents, connects through the Anthropic Messages API to Splaude. Splaude connects to six models: Qwen3.8-27B, Qwen3.6-35B-A3B, Ornith-1.5-122B, Qwen3.8-Flash-Next, Flint and Ternary Bonsai 2. On the API link: 1.8 to 3.2 seconds to first token on warm turns. Directly above Splaude, in the same column, the Splaude claims: up to 2.9 times faster prose decode at 2k to 60k context, bars Splaude 29.4 against plain llama.cpp 10.3 tokens per second at 2k; cold 60k-token prompt, shorter is better, Splaude about 350 seconds against llama.cpp about 780 seconds. Claude Code is drawn as a terminal window running a prompt with its tool loop, hooks and subagents. Splaude is drawn as a die in teal line art: Claude Code options as an orange strip on the side facing Claude Code, DFlash2 decoding as tiles across the top, Metal kernels as a grid of small tiles and SSD expert streaming as nested blocks. Directly below Splaude, same width, in grey with no connections, llama.cpp as the comparison reference only. The six models are bubbles whose area is total parameters with a solid core for the parameters active per token: Qwen3.8-27B 27B dense; Qwen3.6-35B-A3B 35B total, 3B active; Ornith-1.5-122B 122B, active count not listed; Qwen3.8-Flash-Next 125B total, 6B active; Flint 39.8B total, about 2.5B active; Ternary Bonsai 2 27B dense.</desc>
+        <defs>
+          <marker id="arr-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#111827"/>
+          </marker>
+        </defs>
+        <!-- Engine column (x 360-610): claims block, Splaude, llama.cpp share one width and centre -->
+        <!-- Claims block, directly above Splaude -->
+        <rect x="360" y="12" width="250" height="236" rx="14" fill="#ffffff" stroke="#0e7490" stroke-width="1.5"/>
+        <text x="376" y="34" font-size="11" font-weight="800" letter-spacing="1.2" fill="#155e75">SPLAUDE</text>
+        <text x="376" y="70"><tspan font-size="14" font-weight="700" fill="#155e75">up to </tspan><tspan font-size="34" font-weight="800" fill="#0e7490">2.9x</tspan><tspan font-size="17" font-weight="800" fill="#155e75"> faster</tspan></text>
+        <text x="376" y="88" font-size="11.5" fill="#374151">prose decode, 2k-60k context</text>
+        <rect x="376" y="96" width="218" height="18" rx="3" fill="#eef0f3"/>
+        <rect x="376" y="96" width="213.6" height="18" rx="3" fill="#0e7490"/>
+        <text x="382" y="109" font-size="11" font-weight="700" fill="#ffffff">Splaude</text>
+        <text x="586" y="109" text-anchor="end" font-size="11" font-weight="700" fill="#ffffff">29.4 tok/s at 2k</text>
+        <rect x="376" y="118" width="218" height="18" rx="3" fill="#eef0f3"/>
+        <rect x="376" y="118" width="74.8" height="18" rx="3" fill="#b8bec7"/>
+        <text x="382" y="131" font-size="11" fill="#1f2937">llama.cpp</text>
+        <text x="457" y="131" font-size="11" fill="#4b5563">10.3 tok/s</text>
+        <text x="376" y="172"><tspan font-size="30" font-weight="800" fill="#0e7490">~350 s</tspan><tspan font-size="13" font-weight="700" fill="#155e75"> cold 60k prompt</tspan></text>
+        <text x="376" y="190" font-size="11.5" fill="#374151">seconds, shorter is better</text>
+        <rect x="376" y="198" width="218" height="18" rx="3" fill="#eef0f3"/>
+        <rect x="376" y="198" width="95.4" height="18" rx="3" fill="#0e7490"/>
+        <text x="382" y="211" font-size="11" font-weight="700" fill="#ffffff">Splaude</text>
+        <text x="477" y="211" font-size="11" font-weight="700" fill="#155e75">~350 s</text>
+        <rect x="376" y="220" width="218" height="18" rx="3" fill="#eef0f3"/>
+        <rect x="376" y="220" width="212.6" height="18" rx="3" fill="#b8bec7"/>
+        <text x="382" y="233" font-size="11" fill="#1f2937">llama.cpp</text>
+        <text x="584" y="233" text-anchor="end" font-size="11" fill="#1f2937">~780 s</text>
+        <line x1="485" y1="248" x2="485" y2="262" stroke="#0e7490" stroke-width="2"/>
+        <defs>
+          <linearGradient id="line-w" gradientUnits="userSpaceOnUse" x1="360" y1="262" x2="610" y2="492">
+            <stop offset="0" stop-color="#0ea5c6"/>
+            <stop offset="1" stop-color="#7ff3ff"/>
+          </linearGradient>
+          <filter id="glow-w" x="-5%" y="-5%" width="110%" height="110%">
+            <feGaussianBlur stdDeviation="1.1" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <pattern id="vhatch-w" width="4" height="4" patternUnits="userSpaceOnUse"><line x1="2" y1="0" x2="2" y2="4" stroke="#2cc3d9" stroke-width="0.7"/></pattern>
+          <pattern id="hhatch-w" width="4" height="4" patternUnits="userSpaceOnUse"><line x1="0" y1="2" x2="4" y2="2" stroke="#2cc3d9" stroke-width="0.7"/></pattern>
+          <pattern id="ohatch-w" width="4" height="4" patternUnits="userSpaceOnUse"><line x1="0" y1="2" x2="4" y2="2" stroke="#e8875f" stroke-width="0.7"/></pattern>
+          <pattern id="gpu-w" width="12" height="12" patternUnits="userSpaceOnUse"><rect x="1.5" y="1.5" width="9" height="9" fill="none" stroke="#4dd9ec" stroke-width="0.6"/><rect x="3.5" y="3.5" width="5" height="2.5" fill="none" stroke="#4dd9ec" stroke-width="0.4"/><line x1="3.5" y1="8" x2="8.5" y2="8" stroke="#4dd9ec" stroke-width="0.4"/></pattern>
+        </defs>
+        <!-- Claude Code, as a terminal window in Claude's warm orange -->
+        <rect x="20" y="287" width="220" height="180" rx="12" fill="#D97757"/>
+        <rect x="22" y="315" width="216" height="150" rx="10" fill="#262624"/>
+        <rect x="22" y="315" width="216" height="16" fill="#262624"/>
+        <circle cx="36" cy="301" r="4.5" fill="#fbe9e1"/>
+        <circle cx="50" cy="301" r="4.5" fill="#fbe9e1"/>
+        <circle cx="64" cy="301" r="4.5" fill="#fbe9e1"/>
+        <text x="140" y="306" text-anchor="middle" font-size="13.5" font-weight="800" fill="#2b1609">Claude Code</text>
+        <text class="mono" x="32" y="343" font-size="12"><tspan fill="#f0a07f">&gt;</tspan><tspan fill="#f5f4ef"> fix the failing test</tspan></text>
+        <text class="mono" x="32" y="369" font-size="11.5"><tspan fill="#a8a29e">tool loop </tspan><tspan fill="#f5f4ef">Read Edit Bash</tspan></text>
+        <text class="mono" x="32" y="391" font-size="11.5"><tspan fill="#a8a29e">hooks     </tspan><tspan fill="#f5f4ef">every tool call</tspan></text>
+        <text class="mono" x="32" y="413" font-size="11.5"><tspan fill="#a8a29e">subagents </tspan><tspan fill="#f5f4ef">in parallel</tspan></text>
+        <text class="mono" x="32" y="445" font-size="12"><tspan fill="#f0a07f">&gt;</tspan><tspan fill="#f5f4ef"> _</tspan></text>
+        <!-- API link, with the warm time to first token -->
+        <line x1="244" y1="377" x2="357" y2="377" stroke="#111827" stroke-width="2.5" marker-start="url(#arr-w)" marker-end="url(#arr-w)"/>
+        <text x="297" y="345" text-anchor="middle" font-size="13" font-weight="600" fill="#111827">Anthropic</text>
+        <text x="297" y="361" text-anchor="middle" font-size="13" font-weight="600" fill="#111827">Messages API</text>
+        <text x="297" y="405" text-anchor="middle" font-size="21" font-weight="800" fill="#0e7490">1.8-3.2 s</text>
+        <text x="297" y="422" text-anchor="middle" font-size="11.5" font-weight="600" fill="#155e75">first token,</text>
+        <text x="297" y="436" text-anchor="middle" font-size="11.5" font-weight="600" fill="#155e75">warm turns</text>
+        <!-- Splaude, as a die: black die, thin glowing teal line art, our own floorplan -->
+        <rect x="360" y="262" width="250" height="230" rx="14" fill="#000000"/>
+        <g fill="none" stroke="url(#line-w)" filter="url(#glow-w)">
+          <rect x="360.75" y="262.75" width="248.5" height="228.5" rx="13.5" stroke-width="1.5"/>
+          <rect x="368" y="270" width="234" height="214" rx="5" stroke-width="1"/>
+          <!-- top row: tall hatched tiles (DFlash2 decoding) -->
+          <rect x="412" y="300" width="182" height="72" stroke-width="1"/>
+          <rect x="414" y="302" width="26" height="68" fill="url(#vhatch-w)" stroke-width="0.8"/>
+          <rect x="444" y="302" width="26" height="68" fill="url(#vhatch-w)" stroke-width="0.8"/>
+          <rect x="474" y="302" width="26" height="68" fill="url(#vhatch-w)" stroke-width="0.8"/>
+          <rect x="504" y="302" width="26" height="68" fill="url(#vhatch-w)" stroke-width="0.8"/>
+          <rect x="534" y="302" width="26" height="68" fill="url(#vhatch-w)" stroke-width="0.8"/>
+          <rect x="564" y="302" width="26" height="68" fill="url(#vhatch-w)" stroke-width="0.8"/>
+          <!-- bottom middle: dense micro-tile grid (Metal kernels) -->
+          <rect x="414" y="378" width="104" height="98" stroke-width="1"/>
+          <rect x="418" y="382" width="96" height="90" fill="url(#gpu-w)" stroke-width="0.6"/>
+          <!-- bottom right: nested hatched blocks (SSD expert streaming) -->
+          <rect x="524" y="378" width="70" height="98" stroke-width="1"/>
+          <rect x="528" y="382" width="62" height="28" fill="url(#vhatch-w)" stroke-width="0.8"/>
+          <rect x="528" y="414" width="29" height="28" stroke-width="0.8"/>
+          <rect x="532" y="418" width="21" height="20" stroke-width="0.5"/>
+          <rect x="561" y="414" width="29" height="28" fill="url(#hhatch-w)" stroke-width="0.8"/>
+          <rect x="528" y="446" width="62" height="26" stroke-width="0.8"/>
+          <rect x="532" y="450" width="54" height="18" stroke-width="0.5"/>
+        </g>
+        <!-- left edge, facing Claude Code: vertical strip (Claude Code options), the only second colour -->
+        <g fill="none" stroke="#e8875f" filter="url(#glow-w)">
+          <rect x="376" y="300" width="32" height="176" stroke-width="1"/>
+          <rect x="380" y="304" width="24" height="40" fill="url(#ohatch-w)" stroke-width="0.8"/>
+          <rect x="380" y="348" width="24" height="60" stroke-width="0.8"/>
+          <rect x="384" y="352" width="16" height="52" stroke-width="0.5"/>
+          <rect x="380" y="412" width="24" height="60" fill="url(#ohatch-w)" stroke-width="0.8"/>
+        </g>
+        <text x="485" y="291" text-anchor="middle" font-size="15" font-weight="800" fill="url(#line-w)" letter-spacing="0.4">Splaude</text>
+        <g transform="translate(392 388) rotate(-90)">
+          <rect x="-52" y="-8" width="104" height="16" rx="2" fill="#000000"/>
+          <text x="0" y="3.5" text-anchor="middle" font-size="9" font-weight="700" fill="#f0a07f">Claude Code options</text>
+        </g>
+        <rect x="458" y="328" width="90" height="16" rx="2" fill="#000000"/>
+        <text x="503" y="339.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#a5f3fc">DFlash2 decoding</text>
+        <rect x="432" y="419" width="68" height="16" rx="2" fill="#000000"/>
+        <text x="466" y="430.5" text-anchor="middle" font-size="9.5" font-weight="700" fill="#a5f3fc">Metal kernels</text>
+        <rect x="529" y="404" width="60" height="38" rx="2" fill="#000000"/>
+        <text x="559" y="415" text-anchor="middle" font-size="9" font-weight="700" fill="#a5f3fc">SSD</text>
+        <text x="559" y="426" text-anchor="middle" font-size="9" font-weight="700" fill="#a5f3fc">expert</text>
+        <text x="559" y="437" text-anchor="middle" font-size="9" font-weight="700" fill="#a5f3fc">streaming</text>
+        <!-- llama.cpp: directly below Splaude, same outer width and x, plain outline, no lines, no figures -->
+        <rect x="360" y="508" width="250" height="64" rx="12" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6 5"/>
+        <text x="485" y="536" text-anchor="middle" font-size="17" font-weight="700" fill="#4b5563">llama.cpp</text>
+        <text x="485" y="558" text-anchor="middle" font-size="12.5" fill="#4b5563">comparison reference only</text>
+        <!-- Links from the chip's edge to the model bubbles -->
+        <g stroke="#0e7490" stroke-width="2" fill="none">
+          <path d="M610 377 C 658 377, 658 229, 711.1 229"/>
+          <path d="M610 377 C 658 377, 658 273, 709.1 273"/>
+          <path d="M610 377 C 658 377, 658 332.5, 695.4 332.5"/>
+          <path d="M610 377 C 658 377, 658 406, 695 406"/>
+          <path d="M610 377 C 658 377, 658 467, 708.1 467"/>
+          <path d="M610 377 C 658 377, 658 512, 711.1 512"/>
+        </g>
+        <!-- Models as size bubbles: area = total parameters, solid core = active per token -->
+        <circle cx="725" cy="229" r="13.9" fill="#0e7490"/>
+        <circle cx="725" cy="273" r="15.9" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+        <circle cx="725" cy="273" r="4.6" fill="#0e7490"/>
+        <circle cx="725" cy="332.5" r="29.6" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+        <circle cx="725" cy="332.5" r="7" fill="none" stroke="#8a929e" stroke-width="1.2" stroke-dasharray="2 2"/>
+        <circle cx="725" cy="406" r="30" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+        <circle cx="725" cy="406" r="6.6" fill="#0e7490"/>
+        <circle cx="725" cy="467" r="16.9" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+        <circle cx="725" cy="467" r="4.2" fill="#0e7490"/>
+        <circle cx="725" cy="512" r="13.9" fill="#c2410c"/>
+        <g font-size="13" font-weight="700" fill="#111827">
+          <text x="765" y="227">Qwen3.8-27B</text>
+          <text x="765" y="271">Qwen3.6-35B-A3B</text>
+          <text x="765" y="330.5">Ornith-1.5-122B</text>
+          <text x="765" y="404">Qwen3.8-Flash-Next</text>
+          <text x="765" y="465">Flint</text>
+          <text x="765" y="510">Ternary Bonsai 2</text>
+        </g>
+        <g font-size="11" font-weight="600" fill="#155e75">
+          <text x="765" y="242">27B, dense</text>
+          <text x="765" y="286">35B total, 3B active</text>
+          <text x="765" y="345.5" fill="#4b5563">122B, active not listed</text>
+          <text x="765" y="419">125B total, 6B active</text>
+          <text x="765" y="480">39.8B total, ~2.5B active</text>
+          <text x="765" y="525">27B, dense, PQ2_0</text>
+        </g>
+      </svg>
+
+      <!-- Tall layout for phones -->
+      <svg class="dia-tall" viewBox="0 0 400 1285" role="img" aria-labelledby="dia-tall-title dia-tall-desc">
+        <title id="dia-tall-title">Architecture: Claude Code to Splaude to the supported models</title>
+        <desc id="dia-tall-desc">Claude Code, with its tool loop, hooks and subagents, connects through the Anthropic Messages API to Splaude. Splaude connects to six models: Qwen3.8-27B, Qwen3.6-35B-A3B, Ornith-1.5-122B, Qwen3.8-Flash-Next, Flint and Ternary Bonsai 2. On the API link: 1.8 to 3.2 seconds to first token on warm turns. Directly above Splaude, in the same column, the Splaude claims: up to 2.9 times faster prose decode at 2k to 60k context, bars Splaude 29.4 against plain llama.cpp 10.3 tokens per second at 2k; cold 60k-token prompt, shorter is better, Splaude about 350 seconds against llama.cpp about 780 seconds. Claude Code is drawn as a terminal window running a prompt with its tool loop, hooks and subagents. Splaude is drawn as a die in teal line art: Claude Code options as an orange strip on the side facing Claude Code, DFlash2 decoding as tiles across the top, Metal kernels as a grid of small tiles and SSD expert streaming as nested blocks. Directly below Splaude, same width, in grey with no connections, llama.cpp as the comparison reference only. The six models are bubbles whose area is total parameters with a solid core for the parameters active per token: Qwen3.8-27B 27B dense; Qwen3.6-35B-A3B 35B total, 3B active; Ornith-1.5-122B 122B, active count not listed; Qwen3.8-Flash-Next 125B total, 6B active; Flint 39.8B total, about 2.5B active; Ternary Bonsai 2 27B dense.</desc>
+        <defs>
+          <marker id="arr-t" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#111827"/>
+          </marker>
+        </defs>
+        <!-- Engine column (x 50-380): claims block, Splaude, llama.cpp share one width and centre -->
+        <!-- Claims block -->
+        <rect x="50" y="10" width="330" height="258" rx="14" fill="#ffffff" stroke="#0e7490" stroke-width="1.5"/>
+        <text x="64" y="34" font-size="12" font-weight="800" letter-spacing="1.2" fill="#155e75">SPLAUDE</text>
+        <text x="64" y="72"><tspan font-size="15" font-weight="700" fill="#155e75">up to </tspan><tspan font-size="36" font-weight="800" fill="#0e7490">2.9x</tspan><tspan font-size="18" font-weight="800" fill="#155e75"> faster</tspan></text>
+        <text x="64" y="92" font-size="12.5" fill="#374151">prose decode, 2k-60k context</text>
+        <rect x="64" y="102" width="302" height="20" rx="3" fill="#eef0f3"/>
+        <rect x="64" y="102" width="296" height="20" rx="3" fill="#0e7490"/>
+        <text x="70" y="116" font-size="12" font-weight="700" fill="#ffffff">Splaude</text>
+        <text x="354" y="116" text-anchor="end" font-size="12" font-weight="700" fill="#ffffff">29.4 tok/s at 2k</text>
+        <rect x="64" y="126" width="302" height="20" rx="3" fill="#eef0f3"/>
+        <rect x="64" y="126" width="103.7" height="20" rx="3" fill="#b8bec7"/>
+        <text x="70" y="140" font-size="12" fill="#1f2937">llama.cpp</text>
+        <text x="174" y="140" font-size="12" fill="#4b5563">10.3 tok/s</text>
+        <text x="64" y="186"><tspan font-size="32" font-weight="800" fill="#0e7490">~350 s</tspan><tspan font-size="15" font-weight="700" fill="#155e75"> cold 60k prompt</tspan></text>
+        <text x="64" y="206" font-size="12.5" fill="#374151">seconds, shorter is better</text>
+        <rect x="64" y="216" width="302" height="20" rx="3" fill="#eef0f3"/>
+        <rect x="64" y="216" width="132.1" height="20" rx="3" fill="#0e7490"/>
+        <text x="70" y="230" font-size="12" font-weight="700" fill="#ffffff">Splaude</text>
+        <text x="202" y="230" font-size="12" font-weight="700" fill="#155e75">~350 s</text>
+        <rect x="64" y="240" width="302" height="20" rx="3" fill="#eef0f3"/>
+        <rect x="64" y="240" width="294.5" height="20" rx="3" fill="#b8bec7"/>
+        <text x="70" y="254" font-size="12" fill="#1f2937">llama.cpp</text>
+        <text x="352" y="254" text-anchor="end" font-size="12" fill="#1f2937">~780 s</text>
+        <defs>
+          <linearGradient id="line-t" gradientUnits="userSpaceOnUse" x1="50" y1="532" x2="380" y2="762">
+            <stop offset="0" stop-color="#0ea5c6"/>
+            <stop offset="1" stop-color="#7ff3ff"/>
+          </linearGradient>
+          <filter id="glow-t" x="-5%" y="-5%" width="110%" height="110%">
+            <feGaussianBlur stdDeviation="1.1" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <pattern id="vhatch-t" width="4.5" height="4.5" patternUnits="userSpaceOnUse"><line x1="2.25" y1="0" x2="2.25" y2="4.5" stroke="#2cc3d9" stroke-width="0.8"/></pattern>
+          <pattern id="hhatch-t" width="4.5" height="4.5" patternUnits="userSpaceOnUse"><line x1="0" y1="2.25" x2="4.5" y2="2.25" stroke="#2cc3d9" stroke-width="0.8"/></pattern>
+          <pattern id="ohatch-t" width="4.5" height="4.5" patternUnits="userSpaceOnUse"><line x1="0" y1="2.25" x2="4.5" y2="2.25" stroke="#e8875f" stroke-width="0.8"/></pattern>
+          <pattern id="gpu-t" width="14" height="14" patternUnits="userSpaceOnUse"><rect x="1.5" y="1.5" width="11" height="11" fill="none" stroke="#4dd9ec" stroke-width="0.7"/><rect x="4" y="4" width="6" height="3" fill="none" stroke="#4dd9ec" stroke-width="0.5"/><line x1="4" y1="9.5" x2="10" y2="9.5" stroke="#4dd9ec" stroke-width="0.5"/></pattern>
+        </defs>
+        <!-- Claude Code, as a terminal window in Claude's warm orange -->
+        <rect x="20" y="290" width="360" height="150" rx="12" fill="#D97757"/>
+        <rect x="22" y="320" width="356" height="118" rx="10" fill="#262624"/>
+        <rect x="22" y="320" width="356" height="14" fill="#262624"/>
+        <circle cx="38" cy="305" r="5" fill="#fbe9e1"/>
+        <circle cx="54" cy="305" r="5" fill="#fbe9e1"/>
+        <circle cx="70" cy="305" r="5" fill="#fbe9e1"/>
+        <text x="200" y="310" text-anchor="middle" font-size="15" font-weight="800" fill="#2b1609">Claude Code</text>
+        <text class="mono" x="36" y="348" font-size="13.5"><tspan fill="#f0a07f">&gt;</tspan><tspan fill="#f5f4ef"> fix the failing test</tspan></text>
+        <text class="mono" x="36" y="372" font-size="13"><tspan fill="#a8a29e">tool loop </tspan><tspan fill="#f5f4ef">Read Edit Bash</tspan></text>
+        <text class="mono" x="36" y="394" font-size="13"><tspan fill="#a8a29e">hooks     </tspan><tspan fill="#f5f4ef">every tool call</tspan></text>
+        <text class="mono" x="36" y="416" font-size="13"><tspan fill="#a8a29e">subagents </tspan><tspan fill="#f5f4ef">in parallel</tspan></text>
+        <!-- API link, with the warm time to first token -->
+        <line x1="215" y1="444" x2="215" y2="528" stroke="#111827" stroke-width="2.5" marker-start="url(#arr-t)" marker-end="url(#arr-t)"/>
+        <text x="229" y="478" font-size="14" font-weight="600" fill="#111827">Anthropic</text>
+        <text x="229" y="496" font-size="14" font-weight="600" fill="#111827">Messages API</text>
+        <text x="201" y="484" text-anchor="end" font-size="24" font-weight="800" fill="#0e7490">1.8-3.2 s</text>
+        <text x="201" y="504" text-anchor="end" font-size="12.5" font-weight="600" fill="#155e75">first token, warm turns</text>
+        <!-- Splaude, as a die: black die, thin glowing teal line art, our own floorplan -->
+        <rect x="50" y="532" width="330" height="230" rx="14" fill="#000000"/>
+        <g fill="none" stroke="url(#line-t)" filter="url(#glow-t)">
+          <rect x="50.75" y="532.75" width="328.5" height="228.5" rx="13.5" stroke-width="1.5"/>
+          <rect x="60.6" y="540" width="308.9" height="214" rx="5" stroke-width="1"/>
+          <rect x="118.6" y="570" width="240.2" height="72" stroke-width="1"/>
+          <rect x="121.3" y="572" width="34.3" height="68" fill="url(#vhatch-t)" stroke-width="0.8"/>
+          <rect x="160.9" y="572" width="34.3" height="68" fill="url(#vhatch-t)" stroke-width="0.8"/>
+          <rect x="200.5" y="572" width="34.3" height="68" fill="url(#vhatch-t)" stroke-width="0.8"/>
+          <rect x="240.1" y="572" width="34.3" height="68" fill="url(#vhatch-t)" stroke-width="0.8"/>
+          <rect x="279.7" y="572" width="34.3" height="68" fill="url(#vhatch-t)" stroke-width="0.8"/>
+          <rect x="319.3" y="572" width="34.3" height="68" fill="url(#vhatch-t)" stroke-width="0.8"/>
+          <rect x="121.3" y="648" width="137.3" height="98" stroke-width="1"/>
+          <rect x="125.3" y="652" width="129.3" height="90" fill="url(#gpu-t)" stroke-width="0.6"/>
+          <rect x="266.5" y="648" width="92.4" height="98" stroke-width="1"/>
+          <rect x="270.5" y="652" width="84.4" height="28" fill="url(#vhatch-t)" stroke-width="0.8"/>
+          <rect x="270.5" y="684" width="40" height="28" stroke-width="0.8"/>
+          <rect x="274.5" y="688" width="32" height="20" stroke-width="0.5"/>
+          <rect x="314.9" y="684" width="40" height="28" fill="url(#hhatch-t)" stroke-width="0.8"/>
+          <rect x="270.5" y="716" width="84.4" height="26" stroke-width="0.8"/>
+          <rect x="274.5" y="720" width="76.4" height="18" stroke-width="0.5"/>
+        </g>
+        <g fill="none" stroke="#e8875f" filter="url(#glow-t)">
+          <rect x="71.1" y="570" width="42.2" height="176" stroke-width="1"/>
+          <rect x="76.4" y="574" width="31.7" height="40" fill="url(#ohatch-t)" stroke-width="0.8"/>
+          <rect x="76.4" y="618" width="31.7" height="60" stroke-width="0.8"/>
+          <rect x="80.4" y="622" width="23.7" height="52" stroke-width="0.5"/>
+          <rect x="76.4" y="682" width="31.7" height="60" fill="url(#ohatch-t)" stroke-width="0.8"/>
+        </g>
+        <text x="215" y="561" text-anchor="middle" font-size="17" font-weight="800" fill="url(#line-t)" letter-spacing="0.4">Splaude</text>
+        <g transform="translate(92.2 658) rotate(-90)">
+          <rect x="-62" y="-9" width="124" height="18" rx="2" fill="#000000"/>
+          <text x="0" y="4" text-anchor="middle" font-size="10.5" font-weight="700" fill="#f0a07f">Claude Code options</text>
+        </g>
+        <rect x="183.8" y="597" width="110" height="18" rx="2" fill="#000000"/>
+        <text x="238.8" y="610" text-anchor="middle" font-size="11" font-weight="700" fill="#a5f3fc">DFlash2 decoding</text>
+        <rect x="144.9" y="688" width="90" height="18" rx="2" fill="#000000"/>
+        <text x="189.9" y="701" text-anchor="middle" font-size="11" font-weight="700" fill="#a5f3fc">Metal kernels</text>
+        <rect x="278" y="672" width="70" height="44" rx="2" fill="#000000"/>
+        <text x="313" y="685" text-anchor="middle" font-size="10.5" font-weight="700" fill="#a5f3fc">SSD</text>
+        <text x="313" y="698" text-anchor="middle" font-size="10.5" font-weight="700" fill="#a5f3fc">expert</text>
+        <text x="313" y="711" text-anchor="middle" font-size="10.5" font-weight="700" fill="#a5f3fc">streaming</text>
+        <!-- llama.cpp: directly below Splaude, same outer width and x, plain outline, no lines, no figures -->
+        <rect x="50" y="778" width="330" height="64" rx="12" fill="#f3f4f6" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="6 5"/>
+        <text x="215" y="806" text-anchor="middle" font-size="18" font-weight="700" fill="#4b5563">llama.cpp</text>
+        <text x="215" y="830" text-anchor="middle" font-size="13" fill="#4b5563">comparison reference only</text>
+        <!-- Links from the chip's edge to the model bubbles (they pass llama.cpp, never touch it) -->
+        <g stroke="#0e7490" stroke-width="2" fill="none">
+          <path d="M50 647 H 28 V 1250.4"/>
+          <path d="M28 886.6 H 81.4"/>
+          <path d="M28 942.4 H 78.8"/>
+          <path d="M28 1019.1 H 60.5"/>
+          <path d="M28 1114.6 H 60"/>
+          <path d="M28 1193.2 H 77.4"/>
+          <path d="M28 1250.4 H 81.4"/>
+        </g>
+        <!-- Models as size bubbles: area = total parameters, solid core = active per token -->
+        <circle cx="100" cy="886.6" r="18.6" fill="#0e7490"/>
+        <circle cx="100" cy="942.4" r="21.2" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+        <circle cx="100" cy="942.4" r="6.2" fill="#0e7490"/>
+        <circle cx="100" cy="1019.1" r="39.5" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+        <circle cx="100" cy="1019.1" r="9" fill="none" stroke="#8a929e" stroke-width="1.4" stroke-dasharray="2.5 2.5"/>
+        <circle cx="100" cy="1114.6" r="40" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+        <circle cx="100" cy="1114.6" r="8.8" fill="#0e7490"/>
+        <circle cx="100" cy="1193.2" r="22.6" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/>
+        <circle cx="100" cy="1193.2" r="5.7" fill="#0e7490"/>
+        <circle cx="100" cy="1250.4" r="18.6" fill="#c2410c"/>
+        <g font-size="15" font-weight="700" fill="#111827">
+          <text x="152" y="884.6">Qwen3.8-27B</text>
+          <text x="152" y="940.4">Qwen3.6-35B-A3B</text>
+          <text x="152" y="1017.1">Ornith-1.5-122B</text>
+          <text x="152" y="1112.6">Qwen3.8-Flash-Next</text>
+          <text x="152" y="1191.2">Flint</text>
+          <text x="152" y="1248.4">Ternary Bonsai 2</text>
+        </g>
+        <g font-size="12.5" font-weight="600" fill="#155e75">
+          <text x="152" y="901.6">27B, dense</text>
+          <text x="152" y="957.4">35B total, 3B active</text>
+          <text x="152" y="1034.1" fill="#4b5563">122B, active not listed</text>
+          <text x="152" y="1129.6">125B total, 6B active</text>
+          <text x="152" y="1208.2">39.8B total, ~2.5B active</text>
+          <text x="152" y="1265.4">27B, dense, PQ2_0</text>
+        </g>
+      </svg>
+      <figcaption>Speed bars: Splaude (Splash + Claude Code) vs plain llama.cpp, same model and weights (Qwen3.8-27B UD-Q4_K_XL).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section aria-labelledby="h-models">
+  <div class="wrap">
+    <h2 id="h-models">Supported models</h2>
+    <p class="lede">The list is short because each model is tuned individually: it comes with a small helper model that guesses the next words ahead, and GPU code written for that model's exact shape.</p>
+    <p class="lede">Each bubble's area is the model's total parameters; its solid core is the parameters active for each token. A dense model is all core. A mixture-of-experts model is a big shell around a small core: each token uses only a few experts, which is why the rest can be streamed from the SSD.</p>
+    <ul class="bubble-legend" aria-label="Legend">
+      <li><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/></svg>total parameters</li>
+      <li><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#0e7490"/></svg>active per token</li>
+    </ul>
+    <ul class="bubbles">
+      <li>
+        <svg viewBox="0 0 160 160" role="img" aria-label="Qwen3.8-27B: 27 billion parameters, dense, all active"><circle cx="80" cy="80" r="32.5" fill="#0e7490"/></svg>
+        <span class="name">Qwen3.8-27B</span><span class="size">27B, dense: all active</span><span class="meta">GGUF or MLX 4-bit; benchmarked against llama.cpp</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 160 160" role="img" aria-label="Qwen3.6-35B-A3B: 35 billion parameters in total, 3 billion active"><circle cx="80" cy="80" r="37" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/><circle cx="80" cy="80" r="10.8" fill="#0e7490"/></svg>
+        <span class="name">Qwen3.6-35B-A3B</span><span class="size">35B total, 3B active</span><span class="meta">GGUF or MLX 4-bit</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 160 160" role="img" aria-label="Ornith-1.5-122B: 122 billion parameters in total, mixture of experts, active count not listed"><circle cx="80" cy="80" r="69.1" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/><circle cx="80" cy="80" r="16" fill="none" stroke="#8a929e" stroke-width="1.5" stroke-dasharray="3 3"/><text x="80" y="110" text-anchor="middle" font-size="13" fill="#4b5563">active</text><text x="80" y="125" text-anchor="middle" font-size="13" fill="#4b5563">not listed</text></svg>
+        <span class="name">Ornith-1.5-122B</span><span class="size">122B total, MoE</span><span class="meta">GGUF or MLX 4-bit</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 160 160" role="img" aria-label="Qwen3.8-Flash-Next: 125 billion parameters in total, 6 billion active, plus a 51 billion n-gram embedding"><circle cx="80" cy="80" r="70" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/><circle cx="80" cy="80" r="15.3" fill="#0e7490"/></svg>
+        <span class="name">Qwen3.8-Flash-Next</span><span class="size">125B total, 6B active</span><span class="meta">GGUF; plus a 51B n-gram embedding</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 160 160" role="img" aria-label="Flint: 39.8 billion parameters in total, about 2.5 billion active"><circle cx="80" cy="80" r="39.5" fill="#ecfeff" stroke="#0e7490" stroke-width="1.5"/><circle cx="80" cy="80" r="9.9" fill="#0e7490"/></svg>
+        <span class="name">Flint</span><span class="size">39.8B total, ~2.5B active</span><span class="meta">GGUF</span>
+      </li>
+      <li>
+        <svg viewBox="0 0 160 160" role="img" aria-label="Prism ML Ternary Bonsai 2: 27 billion parameters, dense, all active"><circle cx="80" cy="80" r="32.5" fill="#c2410c"/></svg>
+        <span class="name">Ternary Bonsai 2</span><span class="size">27B, dense: all active</span><span class="meta">Prism ML; PQ2_0, 7.2 GB, vision</span>
+      </li>
+    </ul>
+    <p class="note">Parameter counts come from the model names and their Hugging Face model cards: Ornith-1.5-122B (a 122B mixture-of-experts model; its card gives no active count), Qwen3.8-Flash-Next (125B with 6B activated, plus a 51B n-gram embedding and a 4B MTP head), Flint (39.8B total, about 2.5B active). The Ornith card lists Qwen3.8-27B as dense; Ternary Bonsai 2 is built on it.</p>
+    <p class="note">Each model loads in many sizes, 1-bit to 8-bit GGUF and 2-bit to 8-bit MLX, so smaller Macs can run a smaller version. Full list: <a href="models.md">models.md</a>.</p>
+  </div>
+</section>
+
+<section aria-labelledby="h-decode">
+  <div class="wrap">
+    <h2 id="h-decode">Decode speed vs llama.cpp</h2>
+    <p class="lede">Tokens per second while generating about 500 tokens, with the prompt already cached, at three context depths. <strong>Prose</strong> is free text; <strong>copy</strong> repeats text from the prompt, as code edits do. Higher is better.</p>
+    <ul class="legend" aria-label="Legend">
+      <li><span class="sw g1" aria-hidden="true"></span>llama.cpp</li>
+      <li><span class="sw g2" aria-hidden="true"></span>llama.cpp + MTP draft</li>
+      <li><span class="sw sp" aria-hidden="true"></span>Splaude (Splash engine, DFlash2 draft)</li>
+    </ul>
+    <div class="split">
+      <div class="chart" role="group" aria-labelledby="h-prose">
+        <h3 id="h-prose">Prose</h3>
+        <p class="axis-note">tok/s, scale 0 to 40</p>
+        <div class="group" role="group" aria-label="2k context, prose">
+          <div class="group-head"><span class="group-title">2k context</span><span class="group-ratio">2.9x vs llama.cpp, 2.0x vs MTP</span></div>
+          <div class="row grey"><span class="lab">llama.cpp</span><div class="track"><div class="bar g1" style="--f:.2575"></div><span class="val">10.3</span></div></div>
+          <div class="row grey"><span class="lab">llama.cpp + MTP</span><div class="track"><div class="bar g2" style="--f:.375"></div><span class="val">15.0</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.735"></div><span class="val">29.4</span></div></div>
+        </div>
+        <div class="group" role="group" aria-label="20k context, prose">
+          <div class="group-head"><span class="group-title">20k context</span><span class="group-ratio">2.8x vs llama.cpp, 2.1x vs MTP</span></div>
+          <div class="row grey"><span class="lab">llama.cpp</span><div class="track"><div class="bar g1" style="--f:.2375"></div><span class="val">9.5</span></div></div>
+          <div class="row grey"><span class="lab">llama.cpp + MTP</span><div class="track"><div class="bar g2" style="--f:.315"></div><span class="val">12.6</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.6725"></div><span class="val">26.9</span></div></div>
+        </div>
+        <div class="group" role="group" aria-label="60k context, prose">
+          <div class="group-head"><span class="group-title">60k context</span><span class="group-ratio">2.9x vs llama.cpp, 2.6x vs MTP</span></div>
+          <div class="row grey"><span class="lab">llama.cpp</span><div class="track"><div class="bar g1" style="--f:.2075"></div><span class="val">8.3</span></div></div>
+          <div class="row grey"><span class="lab">llama.cpp + MTP</span><div class="track"><div class="bar g2" style="--f:.2325"></div><span class="val">9.3</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.595"></div><span class="val">23.8</span></div></div>
+        </div>
+      </div>
+      <div class="chart" role="group" aria-labelledby="h-copy">
+        <h3 id="h-copy">Copy</h3>
+        <p class="axis-note">tok/s, scale 0 to 40</p>
+        <div class="group" role="group" aria-label="2k context, copy">
+          <div class="group-head"><span class="group-title">2k context</span><span class="group-ratio tie">3.5x vs llama.cpp, 0.9x vs MTP</span></div>
+          <div class="row grey"><span class="lab">llama.cpp</span><div class="track"><div class="bar g1" style="--f:.26"></div><span class="val">10.4</span></div></div>
+          <div class="row grey"><span class="lab">llama.cpp + MTP</span><div class="track"><div class="bar g2" style="--f:.97"></div><span class="val">38.8</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.915"></div><span class="val">36.6</span></div></div>
+        </div>
+        <div class="group" role="group" aria-label="20k context, copy">
+          <div class="group-head"><span class="group-title">20k context</span><span class="group-ratio tie">3.6x vs llama.cpp, 1.0x vs MTP</span></div>
+          <div class="row grey"><span class="lab">llama.cpp</span><div class="track"><div class="bar g1" style="--f:.2375"></div><span class="val">9.5</span></div></div>
+          <div class="row grey"><span class="lab">llama.cpp + MTP</span><div class="track"><div class="bar g2" style="--f:.8475"></div><span class="val">33.9</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.845"></div><span class="val">33.8</span></div></div>
+        </div>
+        <div class="group" role="group" aria-label="60k context, copy">
+          <div class="group-head"><span class="group-title">60k context</span><span class="group-ratio">4.3x vs llama.cpp, 1.3x vs MTP</span></div>
+          <div class="row grey"><span class="lab">llama.cpp</span><div class="track"><div class="bar g1" style="--f:.21"></div><span class="val">8.4</span></div></div>
+          <div class="row grey"><span class="lab">llama.cpp + MTP</span><div class="track"><div class="bar g2" style="--f:.7075"></div><span class="val">28.3</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.905"></div><span class="val">36.2</span></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Copy-heavy output: llama.cpp with its MTP draft is level or slightly ahead up to 20k context.</p>
+  </div>
+</section>
+
+<section aria-labelledby="h-prefill">
+  <div class="wrap">
+    <h2 id="h-prefill">Long prompts and memory</h2>
+    <p class="lede">Claude Code sends large prompts: the system prompt, tool definitions and every file it has read. Processing them is where a first turn spends its time.</p>
+    <div class="split">
+      <div class="chart" role="group" aria-labelledby="h-cold">
+        <h3 id="h-cold">Cold 60k-token prompt</h3>
+        <p class="axis-note">seconds to process the prompt, lower is better</p>
+        <div class="group">
+          <div class="row grey"><span class="lab">llama.cpp</span><div class="track"><div class="bar g1" style="--f:.975"></div><span class="val">~780 s</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.4375"></div><span class="val">~350 s</span></div></div>
+        </div>
+        <p class="fine">Processing speed at 60k: 177 tok/s on Splaude, 79.6 on llama.cpp.</p>
+      </div>
+      <div class="chart" role="group" aria-labelledby="h-mem">
+        <h3 id="h-mem">Wired memory during the run</h3>
+        <p class="axis-note">GB, scale 0 to 35, lower is better</p>
+        <div class="group" role="group" aria-label="2k context, memory">
+          <div class="group-head"><span class="group-title">2k context</span><span class="group-ratio">7.8 GB less</span></div>
+          <div class="row grey"><span class="lab">llama.cpp + MTP</span><div class="track"><div class="bar g2" style="--f:.94"></div><span class="val">32.9</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.7171"></div><span class="val">25.1</span></div></div>
+        </div>
+        <div class="group" role="group" aria-label="20k context, memory">
+          <div class="group-head"><span class="group-title">20k context</span><span class="group-ratio">6.9 GB less</span></div>
+          <div class="row grey"><span class="lab">llama.cpp + MTP</span><div class="track"><div class="bar g2" style="--f:.9486"></div><span class="val">33.2</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.7514"></div><span class="val">26.3</span></div></div>
+        </div>
+        <div class="group" role="group" aria-label="60k context, memory">
+          <div class="group-head"><span class="group-title">60k context</span><span class="group-ratio">3.4 GB less</span></div>
+          <div class="row grey"><span class="lab">llama.cpp + MTP</span><div class="track"><div class="bar g2" style="--f:.9343"></div><span class="val">32.7</span></div></div>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.8371"></div><span class="val">29.3</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-session">
+  <div class="wrap">
+    <h2 id="h-session">In a real Claude Code session</h2>
+    <p class="lede">After the first turn, Claude Code's prompt stays in cache: every request reuses 98% or more of it, so the answer starts in 1.8 to 3.2 seconds.</p>
+    <div class="chart" role="group" aria-labelledby="h-ttft">
+      <h3 id="h-ttft">Warm turns: first token in 1.8 to 3.2 s</h3>
+      <p class="axis-note">time to first token per request, seconds, scale 0 to 4, lower is better; 98% or more of each prompt reused from the cache</p>
+      <div class="group">
+        <div class="row splaude"><span class="lab">Turn 1, after tool</span><div class="track"><div class="bar sp" style="--f:.8"></div><span class="val">3.2 s</span></div></div>
+        <div class="row splaude"><span class="lab">Turn 2, request 1</span><div class="track"><div class="bar sp" style="--f:.475"></div><span class="val">1.9 s</span></div></div>
+        <div class="row splaude"><span class="lab">Turn 2, request 2</span><div class="track"><div class="bar sp" style="--f:.65"></div><span class="val">2.6 s</span></div></div>
+        <div class="row splaude"><span class="lab">Turn 3, request 1</span><div class="track"><div class="bar sp" style="--f:.45"></div><span class="val">1.8 s</span></div></div>
+        <div class="row splaude"><span class="lab">Turn 3, request 2</span><div class="track"><div class="bar sp" style="--f:.55"></div><span class="val">2.2 s</span></div></div>
+      </div>
+      <p class="fine">The first turn processes the prompt of about 11k tokens once, in 49.6 s; every request after it reuses that work from the cache. Decode in this session ran at 31.7 to 51.4 tok/s. At 220k tokens of context, a warm turn's first token came after 12.4 s, with decode at 32.7 tok/s. Splaude only: this session was not run on llama.cpp.</p>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="h-big">
+  <div class="wrap">
+    <h2 id="h-big">Models larger than memory</h2>
+    <p class="lede">A model does not have to fit in memory: Splaude streams the experts it is not using from the SSD.</p>
+    <div class="split">
+      <div class="chart" role="group" aria-labelledby="h-fit">
+        <h3 id="h-fit">Memory to run it</h3>
+        <p class="axis-note">GB, scale 0 to 90</p>
+        <div class="group">
+          <div class="row grey"><span class="lab">llama.cpp</span><div class="track"><div class="bar g1" style="--f:.9289"></div><span class="val">83.6 GB</span></div></div>
+          <p class="rownote grey">llama.cpp: keeps the whole model in memory</p>
+          <div class="row splaude"><span class="lab">Splaude</span><div class="track"><div class="bar sp" style="--f:.5333"></div><span class="val">48 GB</span></div></div>
+          <p class="rownote splaude">Splaude: streams experts from the SSD</p>
+        </div>
+        <p class="fine">Measured on an M4 Pro with 48 GB: Qwen3.8-Flash-Next GSQ-RCO IQ3_S (83.6 GB) through multi-hour Claude Code sessions. llama.cpp was not run on this model; its bar is the memory it would hold.</p>
+      </div>
+      <div class="chart" role="group" aria-labelledby="h-fn-speed">
+        <h3 id="h-fn-speed">Speed while streaming</h3>
+        <p class="stats-inline" style="margin:6px 0 4px;font-size:34px;font-weight:800;color:var(--splaude-dark);line-height:1.1">23.5 to 29.5 tok/s</p>
+        <p class="fine" style="margin-top:4px">median decode over four full Claude Code runs on real repositories.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <h2>Setup and caveats</h2>
+    <p class="fine">Same Mac, same model, same weights file. Speed numbers are from 2026-10-21; the larger-than-memory numbers are from 2026-11-01 to 2026-11-03. Each engine ran alone on the machine. Per depth: one cold request (measures prefill), then two warm requests per output shape (prefix cached, about 500 new tokens, measures decode). Splash figures are the mean of its two warm requests.</p>
+    <div class="table-scroll">
+      <table class="setup">
+        <thead><tr><th scope="col"></th><th scope="col">llama.cpp</th><th scope="col">Splash</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Mac</th><td>M4 Pro, 48 GB</td><td>M4 Pro, 48 GB</td></tr>
+          <tr><th scope="row">Model</th><td>Qwen3.8-27B UD-Q4_K_XL (Unsloth v3)</td><td>the same GGUF file</td></tr>
+          <tr><th scope="row">Engine</th><td>llama.cpp b11493 (08246a28) + id_slot patch</td><td>Splash 1.4.0 (Homebrew)</td></tr>
+          <tr><th scope="row">Speculation</th><td>none, or MTP draft (draft-mtp, n-max 2)</td><td>DFlash2 draft (incoai/Qwen3.8-27B-DFlash2)</td></tr>
+          <tr><th scope="row">KV cache</th><td>q8_0</td><td>int8</td></tr>
+          <tr><th scope="row">Context / slots</th><td>262,144 / 1</td><td>262,144 / 1</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Caveats</h3>
+    <ul>
+      <li>The speed tests ran on Splash 1.4.0, the engine Splaude is built on; Splaude adds the server options Claude Code needs.</li>
+      <li>Splash ran with thinking on during the speed tests (its default then). Rates per token are comparable; total turn time with thinking off is lower.</li>
+      <li>One machine, one model. Splash's speedup comes from the DFlash2 draft and per-model kernels, so other models and Macs will differ.</li>
+      <li>Quality was not compared here. Splash's next-token agreement with llama.cpp is in <a href="performance.md#gguf-against-llamacpp">performance.md</a>.</li>
+    </ul>
+    <p class="fine">All numbers on this page come from <a href="claude-code-benchmarks.md">claude-code-benchmarks.md</a>. Splaude is a fork of <a href="https://github.com/incoai/splash">incoai/splash</a>. Source: <a href="https://github.com/pcvelz/splaude">github.com/pcvelz/splaude</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

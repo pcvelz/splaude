@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 376" width="960" height="376" role="img" aria-labelledby="cs-title cs-desc">
+  <title id="cs-title">In a real Claude Code session: warm turns start in seconds</title>
+  <desc id="cs-desc">Claude Code against Splaude, three turns with Read, Edit and Bash tool calls. Warm requests reused 98 percent or more of the prompt from the cache and their first token came after 3.2, 1.9, 2.6, 1.8 and 2.2 seconds. The first turn processes the prompt of about 11k tokens once, in 49.6 seconds. Decode ran at 31.7 to 51.4 tokens per second. At 220k tokens of context a warm turn's first token came after 12.4 seconds, with decode at 32.7 tokens per second. Splaude only; this session was not run on llama.cpp.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-variant-numeric: tabular-nums; }
+  </style>
+  <rect x="0" y="0" width="960" height="376" fill="#ffffff"/>
+  <text x="20" y="36" font-size="24" font-weight="800" fill="#111827">In a real Claude Code session</text>
+  <text x="20" y="60" font-size="13" fill="#374151">After the first turn, Claude Code's prompt stays in cache: every request reuses 98% or more of it, so the answer starts in 1.8 to 3.2 seconds.</text>
+
+  <rect x="20" y="76" width="920" height="244" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+  <text x="36" y="104" font-size="16" font-weight="700" fill="#111827"><tspan>Warm turns: first token in </tspan><tspan fill="#0e7490" font-weight="800">1.8 to 3.2 s</tspan></text>
+  <text x="36" y="124" font-size="12" fill="#4b5563">time to first token per request, seconds, scale 0 to 4, lower is better</text>
+  <g font-size="12.5">
+    <text x="172" y="153" text-anchor="end" font-weight="700" fill="#155e75">Turn 1, after tool</text>
+    <rect x="180" y="140" width="480" height="18" rx="3" fill="#0e7490"/><text x="667" y="153" font-weight="700" fill="#155e75">3.2 s</text>
+    <text x="172" y="179" text-anchor="end" font-weight="700" fill="#155e75">Turn 2, request 1</text>
+    <rect x="180" y="166" width="285" height="18" rx="3" fill="#0e7490"/><text x="472" y="179" font-weight="700" fill="#155e75">1.9 s</text>
+    <text x="172" y="205" text-anchor="end" font-weight="700" fill="#155e75">Turn 2, request 2</text>
+    <rect x="180" y="192" width="390" height="18" rx="3" fill="#0e7490"/><text x="577" y="205" font-weight="700" fill="#155e75">2.6 s</text>
+    <text x="172" y="231" text-anchor="end" font-weight="700" fill="#155e75">Turn 3, request 1</text>
+    <rect x="180" y="218" width="270" height="18" rx="3" fill="#0e7490"/><text x="457" y="231" font-weight="700" fill="#155e75">1.8 s</text>
+    <text x="172" y="257" text-anchor="end" font-weight="700" fill="#155e75">Turn 3, request 2</text>
+    <rect x="180" y="244" width="330" height="18" rx="3" fill="#0e7490"/><text x="517" y="257" font-weight="700" fill="#155e75">2.2 s</text>
+  </g>
+  <text x="36" y="290" font-size="12" fill="#4b5563">The first turn processes the prompt of about 11k tokens once, in 49.6 s; every request after it reuses that work from the cache.</text>
+  <text x="36" y="307" font-size="12" fill="#4b5563">Decode ran at 31.7 to 51.4 tok/s. At 220k tokens of context, a warm turn's first token came after 12.4 s, with decode at 32.7 tok/s.</text>
+
+  <text x="20" y="344" font-size="11" fill="#4b5563">Measured on an M4 Pro with 48 GB, Qwen3.8-27B, three turns with Read, Edit and Bash at 11k to 12k tokens of context.</text>
+  <text x="20" y="360" font-size="11" fill="#4b5563">Splaude only: this session was not run on llama.cpp. Details: docs/claude-code-benchmarks.md</text>
+</svg>

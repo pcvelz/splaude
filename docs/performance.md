@@ -1,6 +1,6 @@
 # Performance
 
-[Back to Splash](../README.md#performance)
+[Back to Splaude](../README.md#more)
 
 ## Splash 1.0 launch benchmarks
 
