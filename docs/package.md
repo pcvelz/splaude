@@ -17,24 +17,29 @@ make package-check RELEASE_VERSION=$VERSION
 
 `make package` writes the runtime archive,
 `dist/splash-<version>-arm64-macos26.tar.gz`, its checksum beside it
-(`<archive>.sha256`) and the formula, `dist/splash-claude.rb`; `make package-bottle`
+(`<archive>.sha256`) and the formula, `dist/splaude.rb`; `make package-bottle`
 adds the bottle to `dist/` and its block to the formula. These commands do not
 publish. Build bottles on the oldest supported macOS. Bottle/check commands use
 a temporary tap and remove their installation; they refuse to replace an
 existing Splash installation. The install check requires a poured bottle and
 runs the bundled launcher without a compiler or separate Python installation.
 
-To publish, tag the verified release commit in `pcvelz/splash-claude` with the version
+To publish, tag the verified release commit in `pcvelz/splaude` with the version
 (no `v` prefix), preserving existing history and tags, and make the release
 with `make release-app` ([releases](#releases)). Its folder carries the runtime
 archive, its `.sha256` file and the bottle beside the desktop app's disk images
-and appcast, and `dist/splash-claude.rb` as `Formula/splash-claude.rb`, which the pull
+and appcast, and `dist/splaude.rb` as `Formula/splaude.rb`, which the pull
 request in `pcvelz/homebrew-tap` takes beside the app's cask; the formula's
 URLs must point to the published release assets. After the tap update merges,
 verify a fresh install and an upgrade from the previous release through the
 public tap, including a real model request and preservation of user data. Run
-`brew trust --formula pcvelz/tap/splash-claude`, then
-`brew audit --strict --online pcvelz/tap/splash-claude`.
+`brew trust --formula pcvelz/tap/splaude`, then
+`brew audit --strict --online pcvelz/tap/splaude`.
+
+The formula was called `splash-claude` before the rename to `splaude`. The tap
+carries `formula_renames.json` (`{"splash-claude": "splaude"}`), which the release
+folder includes beside `Formula/`, so `brew upgrade` moves existing installs to
+the new name; the formula also keeps `splash-claude` as a symlink to `splaude`.
 
 Before publishing, verify that the models the README names and the draft
 repositories of `families.FAMILIES` are publicly accessible. Check the installed
@@ -107,7 +112,7 @@ installed models, they also drive the app end to end and, with
 
 The app updates itself with [Sparkle](https://sparkle-project.org), the
 release `app/Package.swift` pins. It checks the appcast of the latest GitHub
-release, `https://github.com/pcvelz/splash-claude/releases/latest/download/appcast.xml`
+release, `https://github.com/pcvelz/splaude/releases/latest/download/appcast.xml`
 (`APPCAST_URL` in `dev/tools/package_app.py`), a URL every app shipped keeps,
 and opens a disk image it downloads only once it has checked who signed it:
 the release key, an EdDSA key whose public half is `SPARKLE_PUBLIC_KEY` there,
@@ -193,15 +198,15 @@ folder it names.
 
 It writes `dist/release/<version>` and uploads nothing: `Splash-<version>.dmg`
 and the same file as `Splash.dmg`, which
-`https://github.com/pcvelz/splash-claude/releases/latest/download/Splash.dmg` names,
+`https://github.com/pcvelz/splaude/releases/latest/download/Splash.dmg` names,
 the command line's archive, `.sha256` file and bottle, `SHA256SUMS` of the disk
 images and archives, `appcast.xml`, `notes.md`, the notary logs and, unless it
-is a release candidate, `Formula/splash-claude.rb` and `Casks/splash-app.rb` for
+is a release candidate, `Formula/splaude.rb`, `formula_renames.json` and `Casks/splaude-app.rb` for
 `pcvelz/homebrew-tap`. The cask's `zap` removes the app's chats, logs, caches
 and settings, not the models, locks and runtime the command line keeps in
 `~/Library/Application Support/Splash`, nor the Hugging Face cache. It prints
 what publishing takes, from the folder, so that a copy of it can be published
-from another Mac, one with `gh` signed in with write access to `pcvelz/splash-claude`
+from another Mac, one with `gh` signed in with write access to `pcvelz/splaude`
 and `pcvelz/homebrew-tap`, and Homebrew with `pcvelz/tap` tapped: the tag, a
 draft release of the folder's files, published once its `Splash.dmg` opens on
 a clean Mac, and the tap's pull request.
@@ -276,7 +281,7 @@ Downloads or another disk, point Sparkle at its appcast:
 
 ```sh
 defaults write ai.inco.splash SUFeedURL \
-    https://github.com/pcvelz/splash-claude/releases/download/x.y.z-rc.1/appcast.xml
+    https://github.com/pcvelz/splaude/releases/download/x.y.z-rc.1/appcast.xml
 ```
 
 Check for Updates… then installs it and relaunches; each prompt comes once, and

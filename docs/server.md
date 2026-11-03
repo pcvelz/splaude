@@ -3,8 +3,8 @@
 ## Build and run
 
 ```sh
-git clone https://github.com/pcvelz/splash-claude.git
-cd splash-claude
+git clone https://github.com/pcvelz/splaude.git
+cd splaude
 make -j4
 ./splash serve --model mlx-community/Qwen3.8-27B-4bit
 ```

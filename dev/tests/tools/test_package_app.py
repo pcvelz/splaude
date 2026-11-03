@@ -65,7 +65,7 @@ class PackageAppTests(unittest.TestCase):
                 "NSHighResolutionCapable": True,
                 "NSAppTransportSecurity": {"NSAllowsLocalNetworking": True},
                 "NSHumanReadableCopyright": "Copyright © Inco AI",
-                "SUFeedURL": "https://github.com/incoai/splash/releases/latest/"
+                "SUFeedURL": "https://github.com/pcvelz/splaude/releases/latest/"
                 "download/appcast.xml",
             },
         )

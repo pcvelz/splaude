@@ -26,11 +26,11 @@ sys.path.insert(0, str(ROOT))
 
 from dev.tools import appcast, package, package_app  # noqa: E402
 
-# The tap pcvelz/homebrew-tap: the command line's formula, splash-claude,
-# and the app's cask, splash-app.
+# The tap pcvelz/homebrew-tap: the command line's formula, splaude,
+# and the app's cask, splaude-app.
 TAP = "pcvelz/tap"
-FORMULA = "splash-claude"
-CASK = "splash-app"
+FORMULA = "splaude"
+CASK = "splaude-app"
 # A Developer ID Application identity as codesign takes it, by its name, whose
 # team, a person's or an organization's, is all that tells their releases
 # apart, or by its certificate's SHA-1, which tells apart two of one name.
@@ -260,7 +260,7 @@ def command_line(version):
     text = formula.read_text() if formula.is_file() else ""
     if not all(package.digest(path) in text for path in (archive, *bottles)):
         problem = (
-            f"dist/splash-claude.rb is not the formula of {archive.name} and its bottle: "
+            f"dist/splaude.rb is not the formula of {archive.name} and its bottle: "
             "make package-bottle"
         )
         return files, formula, problem
@@ -502,6 +502,10 @@ def make(args, folder, identity, team, carried, run):
             os.link(path, folder / path.name)
         (folder / "Formula").mkdir()
         shutil.copyfile(formula, folder / "Formula" / f"{FORMULA}.rb")
+        # Keeps `brew upgrade` moving existing splash-claude installs to splaude.
+        (folder / "formula_renames.json").write_text(
+            json.dumps({"splash-claude": FORMULA}, indent=2) + "\n"
+        )
     # The disk images and the archives, not the files that describe them.
     (folder / "SHA256SUMS").write_text(
         checksums(
@@ -560,13 +564,21 @@ def publishing(version, folder, assets):
     return lines + [
         f"# Then, with write access to pcvelz/homebrew-tap and Homebrew, {TAP} "
         "tapped, the formula and the cask, on a branch of the tap:",
-        f"cp -R Formula Casks {tap}",
+        f"cp -R Formula Casks formula_renames.json {tap}",
         f"cd {tap} && git switch -c {branch}",
         shlex.join(["brew", "audit", "--strict", "--online", f"{TAP}/{FORMULA}"]),
         shlex.join(
             ["brew", "audit", "--cask", "--strict", "--online", f"{TAP}/{CASK}"]
         ),
-        shlex.join(["git", "add", f"Formula/{FORMULA}.rb", f"Casks/{CASK}.rb"])
+        shlex.join(
+            [
+                "git",
+                "add",
+                f"Formula/{FORMULA}.rb",
+                f"Casks/{CASK}.rb",
+                "formula_renames.json",
+            ]
+        )
         + " && "
         + shlex.join(["git", "commit", "-m", f"{FORMULA} {version}"]),
         shlex.join(["git", "push", "-u", "origin", branch]) + " && gh pr create --fill",

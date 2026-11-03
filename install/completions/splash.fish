@@ -23,7 +23,7 @@ function __splash_local_file_value
     or string match -qr -- '^--(model-dir|draft-model|mmproj)=' (commandline -ct)
 end
 
-for cmd in splash splash-claude
+for cmd in splash splaude splash-claude
     complete -c $cmd -f
     complete -c $cmd -n 'test (count (commandline -opc)) -eq 1' -a 'serve claude codex opencode hermes pi'
     complete -c $cmd -n __splash_model_value -l model -x -a '(__splash_models)'

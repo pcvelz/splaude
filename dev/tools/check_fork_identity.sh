@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Flags upstream identity where the fork's own is meant.
 #
-# This fork publishes pcvelz/splash-claude (GitHub), pcvelz/tap (Homebrew) and the
-# formula splash-claude. Code, docs or release artifacts that name upstream's
+# This fork publishes pcvelz/splaude (GitHub), pcvelz/tap (Homebrew) and the
+# formula splaude. Code, docs or release artifacts that name upstream's
 # release repo, tap, or install command silently send users, the updater and
 # `brew` to incoai instead of us. Mentions that are only credit stay legal: the
 # README's "fork of" line, links to upstream pull requests, and the incoai/<Model>
@@ -20,9 +20,9 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-FORK_REPO="pcvelz/splash-claude"
+FORK_REPO="pcvelz/splaude"
 FORK_TAP="pcvelz/tap"
-FORMULA_CLASS="SplashClaude"
+FORMULA_CLASS="Splaude"
 
 # Tracked code and docs: only the forms that publish or install from upstream.
 CODE_PATTERN='incoai/(homebrew-tap|tap)([^A-Za-z0-9_-]|$)|incoai/splash(\.git|/releases)|incoai\.github\.io|brew +(install|tap|upgrade|audit|reinstall|info)[^|]*incoai/'
@@ -70,8 +70,8 @@ scan_artifacts() {
         grep -qE "^class (Splash|SplashApp) " "$f" \
             && fail "$f: class name is upstream's (Splash/SplashApp) - the fork's formula is $FORMULA_CLASS"
         if grep -q "^class $FORMULA_CLASS < Formula" "$f"; then
-            grep -q 'bin/"splash-claude"' "$f" \
-                || fail "$f: formula does not install the fork's splash-claude command"
+            grep -q 'bin/"splaude"' "$f" \
+                || fail "$f: formula does not install the fork's splaude command"
             if grep -q '(bin/"splash")' "$f"; then
                 fail "$f: formula still installs upstream's splash command"
             fi

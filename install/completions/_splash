@@ -1,4 +1,4 @@
-#compdef splash splash-claude
+#compdef splash splaude splash-claude
 
 # Keep the stable install path so an already-running shell survives upgrades.
 typeset -g _splash_completion_source=${${(%):-%x}:a}
@@ -39,5 +39,5 @@ _splash() {
 if [[ $zsh_eval_context[-1] == loadautofunc ]]; then
     _splash "$@"
 elif (( $+functions[compdef] )); then
-    compdef _splash splash splash-claude
+    compdef _splash splash splaude splash-claude
 fi

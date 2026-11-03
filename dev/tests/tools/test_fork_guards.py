@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[3]
 PRE_PUSH = ROOT / ".githooks" / "pre-push"
 IDENTITY = ROOT / "dev" / "tools" / "check_fork_identity.sh"
 ZERO = "0" * 40
-FORK_URL = "https://github.com/pcvelz/splash-claude"
+FORK_URL = "https://github.com/pcvelz/splaude"
 
 
 class Repo:

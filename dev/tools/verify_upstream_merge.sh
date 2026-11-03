@@ -18,7 +18,7 @@ set -uo pipefail
 
 cd "$(git rev-parse --show-toplevel)" || exit 2
 
-FORK_REPO="pcvelz/splash-claude"
+FORK_REPO="pcvelz/splaude"
 UPSTREAM_REF="${UPSTREAM_REF:-upstream/main}"
 FAILS=0
 
@@ -117,22 +117,22 @@ if grep -qE "^REPOSITORY *= *\"$FORK_REPO\"" <<< "$PKG"; then
 else
     fail "dev/tools/package.py REPOSITORY is not $FORK_REPO - keep the fork's value when resolving the conflict"
 fi
-if grep -qE '^class SplashClaude < Formula' <<< "$PKG"; then
-    pass "formula class is SplashClaude"
+if grep -qE '^class Splaude < Formula' <<< "$PKG"; then
+    pass "formula class is Splaude"
 else
-    fail "formula class is not SplashClaude - the merge took upstream's formula"
+    fail "formula class is not Splaude - the merge took upstream's formula"
 fi
 REL=$(blob "$REV" dev/tools/release_app.py)
-if grep -qE '^TAP *= *"pcvelz/tap"' <<< "$REL" && grep -qE '^FORMULA *= *"splash-claude"' <<< "$REL"; then
-    pass "release_app.py publishes to pcvelz/tap as splash-claude"
+if grep -qE '^TAP *= *"pcvelz/tap"' <<< "$REL" && grep -qE '^FORMULA *= *"splaude"' <<< "$REL"; then
+    pass "release_app.py publishes to pcvelz/tap as splaude"
 else
-    fail "release_app.py TAP/FORMULA are not pcvelz/tap + splash-claude - the merge would publish to upstream's tap"
+    fail "release_app.py TAP/FORMULA are not pcvelz/tap + splaude - the merge would publish to upstream's tap"
 fi
 README=$(blob "$REV" README.md)
-if grep -qi 'fork of' <<< "$README" && grep -q 'brew install pcvelz/tap/splash-claude' <<< "$README"; then
+if grep -qi 'fork of' <<< "$README" && grep -q 'brew install pcvelz/tap/splaude' <<< "$README"; then
     pass "README keeps the fork-of line and the pcvelz/tap install command"
 else
-    fail "README lost the fork-of line or the 'brew install pcvelz/tap/splash-claude' command - README: keep ours"
+    fail "README lost the fork-of line or the 'brew install pcvelz/tap/splaude' command - README: keep ours"
 fi
 
 # ---------------------------------------------------------------- 5. upstream identity in the merged tree

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prints the last splash-claude release tag reachable from a commit.
+# Prints the last splaude release tag reachable from a commit.
 #
 # Plain `git describe --tags` is NOT safe in this fork. Upstream tags releases
 # x.y.z, the same bare form we use, so `git fetch upstream` (without --no-tags)
@@ -20,7 +20,7 @@ set -euo pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-FORK_REPO="pcvelz/splash-claude"
+FORK_REPO="pcvelz/splaude"
 REV="${1:-HEAD}"
 
 die() { echo "last_release_tag: $*" >&2; exit 2; }
