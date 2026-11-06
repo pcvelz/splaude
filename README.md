@@ -40,8 +40,9 @@ loading unused weights from the SSD on demand
 
 ## Manual installation
 
-Needs an Apple M3 or newer with macOS 26.4 or later. Start the server, here
-with Qwen3.8-27B and the settings we run Claude Code with on a 48 GB Mac:
+Needs an Apple M3 or newer with macOS 26.4 or later. Start the server with a
+model that fits your Mac (table below) and the settings Claude Code needs. This
+is Qwen3.8-27B as we run it:
 
 ```bash
 splaude serve --model unsloth/Qwen3.8-27B-GGUF:UD-Q6_K_XL \
@@ -52,29 +53,44 @@ splaude serve --model unsloth/Qwen3.8-27B-GGUF:UD-Q6_K_XL \
   --max-context 262144 --kv-format int8 --idle-release off
 ```
 
-Swap in a `--model` that fits your Mac's memory:
+What each setting does:
 
-| Your Mac | Model | Download | Note |
+- `--model owner/repo:QUANT`: the GGUF to serve, downloaded on the first start.
+- `--accept-any-model`: Claude Code asks for several model names (its title and
+  summary calls too); every one is answered with the loaded model.
+- `--sampling-headers`: a session can set sampling per request through headers.
+- `--reasoning off`: no thinking on Claude Code's turns; in our runs thinking
+  never rescued a stuck tool loop on Qwen3.8-27B and only slowed every turn.
+  Qwen3.8-Flash-Next is the exception: it runs `--reasoning auto`.
+- `--sampling-default NAME=VALUE`: Claude Code sends no sampling settings, so
+  these become them. Shown: the model card's instruct recipe (temperature 0.7,
+  top_p 0.8, top_k 20, min_p 0) plus `presence_penalty=1.5`, which keeps long
+  tool loops from repeating themselves. Flash-Next takes its thinking recipe
+  instead: `temperature=1.0 top_p=0.95 top_k=20 min_p=0 presence_penalty=0`.
+- `--max-context 262144`: the context Claude Code may fill. Lower it when the
+  model leaves little memory for the cache; 131072 is plenty for most sessions.
+- `--kv-format int8`: halves the memory of the context cache.
+- `--idle-release off`: keeps the model loaded between turns, so the next
+  turn starts at once.
+- Flash-Next only: add `--sparse-kv-memory 1200M` (its sparse-attention cache),
+  and start Claude Code with `MAX_THINKING_TOKENS=4096` in its environment.
+
+Pick the `--model` for your Mac's memory:
+
+| Your Mac | Model | Download | Where this comes from |
 |---|---|---|---|
-| 24 GB | `unsloth/Qwen3.8-27B-GGUF:UD-IQ3_XXS` | 16 GB | Splash's suggestion |
-| 36 GB | `unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M` | 21 GB | Splash's suggestion |
-| 48 GB | `unsloth/Qwen3.8-27B-GGUF:UD-Q6_K_XL` | 26 GB | tested by us |
-| 48 GB | `unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL` | 111 GB | tested by us, streams from the SSD |
-| 64 GB | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:Q2_0` | 69 GB | Splash's suggestion |
-| 96 GB or more | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:IQ3_S` | 86 GB | Splash's suggestion |
+| 24 GB | `unsloth/Qwen3.8-27B-GGUF:UD-IQ3_XXS` | 16 GB | Splash's pick for this size |
+| 36 GB | `unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M` | 21 GB | Splash's pick for this size |
+| 48 GB | `unsloth/Qwen3.8-27B-GGUF:UD-Q6_K_XL` | 26 GB | runs our own Claude Code sessions |
+| 48 GB | `unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL` | 111 GB | runs our own Claude Code sessions; experts stream from the SSD |
+| 64 GB | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:IQ3_S` | 84 GB | the quant Splash's maintainer moved to over 2-bit; community reports, not our own runs |
+| 96 GB or more | `unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL` | 111 GB | the quant we run, on Macs with room for most of it; community reports; take IQ3_S when speed matters more than reliability |
 
-Qwen3.8-Flash-Next runs with reasoning on and its own sampling:
-
-```bash
-splaude serve --model unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL \
-  --accept-any-model --sampling-headers --reasoning auto \
-  --sampling-default temperature=1.0 --sampling-default top_p=0.95 \
-  --sampling-default top_k=20 --sampling-default min_p=0 \
-  --sampling-default presence_penalty=0 --sparse-kv-memory 1200M \
-  --max-context 262144 --kv-format int8 --idle-release off
-```
-
-and Claude Code with `MAX_THINKING_TOKENS=4096` added to the lines below.
+A model larger than memory still runs: Splash keeps the experts it is not using
+on the SSD and streams them in. The price is decode speed: on one Mac, the
+111 GB UD-Q4_K_XL decodes at about 15 tokens per second against 43 for the 84 GB
+IQ3_S, and the more memory you have, the less streams. Qwen3.8-27B is the better
+choice on smaller Macs; we have not run Flash-Next below the sizes in the table.
 
 When it prints `Ready`, start Claude Code in a second terminal:
 
@@ -155,11 +171,11 @@ Every option is off unless you set it, so without them Splaude behaves like Spla
 
 | Option | What it does | Upstream |
 |---|---|---|
-| `--accept-any-model` | Serves every model name Claude Code asks for, including its title and summary requests, with the loaded model. | fork only |
+| `--accept-any-model` | Serves every model name Claude Code asks for, including its title and summary requests, with the loaded model. | Splaude only |
 | `--reasoning off` | Never think, whatever the request asks. The default, `auto`, lets each request decide. | [#615](https://github.com/incoai/splash/pull/615) |
 | `--sampling-default NAME=VALUE` | Claude Code sends no sampling settings; these become the defaults. | [#614](https://github.com/incoai/splash/pull/614) |
 | `--sampling-headers` | Set sampling per session through headers, e.g. `ANTHROPIC_CUSTOM_HEADERS=$'X-Temperature: 0.7'`. | [#618](https://github.com/incoai/splash/pull/618) |
-| `--chat-template-file FILE` | Use your own chat template. | fork only |
+| `--chat-template-file FILE` | Use your own chat template. | Splaude only |
 
 **For supervisors and proxies**
 
@@ -168,7 +184,7 @@ Every option is off unless you set it, so without them Splaude behaves like Spla
 | `--engine-failure exit` | Exit when the engine fails, so the supervisor restarts it. | [#617](https://github.com/incoai/splash/pull/617) |
 | `--spawn-guard COMMAND` | Run a check before every engine start. | [#637](https://github.com/incoai/splash/pull/637) |
 | `--llama-cpp-compat` | llama.cpp-style `/slots`, `/props` and `id_slot`, for proxies such as [llama-swap](https://github.com/pcvelz/llama-swap-macos-extended). | [#638](https://github.com/incoai/splash/pull/638) |
-| `-m` / `--model-file PATH` | Report which model file is served. | fork only |
+| `-m` / `--model-file PATH` | Report which model file is served. | Splaude only |
 | (relaunch) | A new engine starts only after the old one exits. | merged, [#616](https://github.com/incoai/splash/pull/616) |
 
 ## More
