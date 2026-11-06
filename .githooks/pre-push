@@ -9,8 +9,10 @@
 #    its second parent is in upstream/main; clones without an `upstream` remote
 #    skip this part. A merge that is itself in upstream/main is upstream's own
 #    history (a rebase onto upstream carries those), not one of our syncs.
-# 3. The pushed tip must carry no upstream release repo, tap or install command
-#    (dev/tools/check_fork_identity.sh).
+# 3. The pushed tip of a fork branch, one whose history contains main, must
+#    carry no upstream release repo, tap or install command
+#    (dev/tools/check_fork_identity.sh). A branch without main in its history
+#    is an upstream PR branch and carries upstream's identity by design.
 
 REMOTE_NAME="$1"
 REMOTE_URL="$2"
@@ -44,7 +46,14 @@ while read -r LOCAL_REF LOCAL_OID REMOTE_REF REMOTE_OID; do
         done
     fi
 
-    if ! bash dev/tools/check_fork_identity.sh "$LOCAL_OID"; then
+    # A ref without the fork's main in its history is an upstream PR branch
+    # (upstream/main plus the commits we send to incoai/splash): it carries
+    # upstream's README, tap and install lines by design, so the identity
+    # check is for the fork's own branches, every one of which contains main.
+    if git rev-parse -q --verify refs/heads/main >/dev/null 2>&1 \
+        && ! git merge-base --is-ancestor refs/heads/main "$LOCAL_OID"; then
+        echo "[pre-push] $LOCAL_REF: upstream PR branch (fork main not in its history), identity check skipped"
+    elif ! bash dev/tools/check_fork_identity.sh "$LOCAL_OID"; then
         echo "[pre-push] BLOCKED: $LOCAL_REF carries upstream identity (see above)." >&2
         STATUS=1
     fi

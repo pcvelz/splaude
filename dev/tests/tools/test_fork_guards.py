@@ -125,6 +125,30 @@ class PrePushTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("is upstream", result.stderr)
 
+    def test_an_upstream_pr_branch_carries_upstream_identity_unchecked(self):
+        """A ref without the fork's main in its history is one we send to
+        upstream, and carries upstream's install line by design; the same
+        line on a branch that contains main is still refused."""
+        install_guards(self.repo, verifier_exit=0)
+        upstream_line = "brew install incoai/tap/splash\n"
+        fork_tip = self.repo.commit("README.md", upstream_line)
+        result = push(self.repo, fork_tip)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("carries upstream identity", result.stderr)
+        # An orphan history: upstream's own, which never contains the fork's main.
+        self.repo.git("checkout", "-q", "--orphan", "pr")
+        self.repo.git("rm", "-rfq", "--cached", ".")
+        pr_tip = self.repo.commit("README.md", upstream_line)
+        result = subprocess.run(
+            ["sh", ".githooks/pre-push", "origin", FORK_URL],
+            cwd=self.tmp,
+            input=f"refs/heads/pr {pr_tip} refs/heads/pr {ZERO}\n",
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("upstream PR branch", result.stdout)
+
 
 class IdentityTests(unittest.TestCase):
     def setUp(self):
