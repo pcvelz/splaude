@@ -281,6 +281,10 @@ class PackageTests(unittest.TestCase):
                 self.assertEqual(results[0], results[1])
                 self.assertTrue(results[0][0].is_relative_to(root / "home"))
 
+    def test_every_install_module_is_packaged(self):
+        modules = {path.name for path in (package.ROOT / "install").glob("*.py")}
+        self.assertEqual(modules - set(package.INSTALL_FILES), set())
+
     def test_formula_invokes_bundled_runtime_without_build_or_dependency_install(self):
         text = package.formula(
             "1.0", "https://example.org/release.tar.gz", "a" * 64, "26.4"
