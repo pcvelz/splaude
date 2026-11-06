@@ -242,7 +242,7 @@ class CompletionTests(unittest.TestCase):
         cases = (
             (
                 ["splash", ""],
-                ["serve", "claude", "codex", "opencode", "hermes", "pi"],
+                ["serve", "setup", "claude", "codex", "opencode", "hermes", "pi"],
             ),
             (["splash", "co"], ["codex"]),
             (
@@ -511,7 +511,7 @@ class CompletionTests(unittest.TestCase):
     def test_actual_zsh_tab(self):
         _, directory = self.layout()
         for line, expected in (
-            ("splash se", "splash serve "),
+            ("splash ser", "splash serve "),
             ("splash p", "splash pi "),
             ("splash serve --model community/l", f"splash serve --model {LOCAL[1]} "),
             ("splash serve --model=community/l", f"splash serve --model={LOCAL[1]} "),

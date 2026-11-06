@@ -330,6 +330,13 @@ def _renders_later_system(port):
 
 
 def coding_client(args):
+    path, command, environment = client_launch(args)
+    os.execvpe(path, command, environment)
+
+
+def client_launch(args, quiet=False):
+    """The program, argv and environment that start args.command against
+    the ready local server, after the notes its start prints unless quiet."""
     path = clients.find_executable(args.command)
     listing = _request_json("/v1/models", port=args.port)
     if listing is None:
@@ -371,6 +378,8 @@ def coding_client(args):
         client_version=client_version,
         later_system=args.command == "pi" and _renders_later_system(args.port),
     )
+    if quiet:
+        return path, command, environment
     print(f"Starting {args.command}: {model} · {context:,} context tokens", flush=True)
     if args.command == "claude":
         print(
@@ -384,7 +393,7 @@ def coding_client(args):
             "OpenAI's search service. Local tools and MCP are unchanged.",
             flush=True,
         )
-    os.execvpe(path, command, environment)
+    return path, command, environment
 
 
 def _parse_port(value):
@@ -520,6 +529,9 @@ def parse_args(argv=None):
             type=_parse_port,
             help=f"server port (default: SPLASH_PORT or {serve_options.DEFAULT_PORT})",
         )
+    commands.add_parser(
+        "setup", help="guided setup: Claude proposes a model, Splaude installs it"
+    )
     if is_client:
         # Only --port belongs to Splash; preserve the agent's other arguments,
         # including --help, and stop interpreting options at its separator.
@@ -529,7 +541,7 @@ def parse_args(argv=None):
     else:
         args = parser.parse_args(argv)
     # An explicit --port wins; SPLASH_PORT is read only without one.
-    args.explicit_port = args.port is not None
+    args.explicit_port = getattr(args, "port", None) is not None
     if not args.explicit_port:
         try:
             args.port = _parse_port(
@@ -557,6 +569,12 @@ def parse_args(argv=None):
 
 
 def main(argv=None):
+    argv = list(sys.argv[1:] if argv is None else argv)
+    # A bare splaude and splaude setup are Splaude's own command.
+    if not argv or argv == ["setup"]:
+        from . import splaude
+
+        return splaude.main(setup=bool(argv))
     args = parse_args(argv)
     try:
         return serve(args) if args.command == "serve" else coding_client(args)
