@@ -18,6 +18,8 @@ splaude
 
 Claude does the rest.
 
+Rather set it up yourself? See [Manual installation](#manual-installation).
+
 ## How it works
 
 [![Splaude: Claude Code on Splash, compared with llama.cpp](docs/images/how-it-fits.svg)](https://pcvelz.github.io/splaude/claude-code-overview.html)
@@ -34,17 +36,7 @@ loading unused weights from the SSD on demand
 
 ## Manual installation
 
-Needs an Apple M3 or newer with macOS 26.4 or later. Pick a model for your
-Mac's memory:
-
-| Your Mac | Model | Download |
-|---|---|---|
-| 24 GB | `unsloth/Qwen3.8-27B-GGUF:UD-IQ3_XXS` | 16 GB |
-| 36 GB or more | `unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M` | 21 GB |
-| 64 GB | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:Q2_0` | 69 GB |
-| 96 GB or more | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:IQ3_S` | 86 GB |
-
-Start the server:
+Needs an Apple M3 or newer with macOS 26.4 or later. Start the server:
 
 ```bash
 splaude serve --model unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL \
@@ -53,6 +45,15 @@ splaude serve --model unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL \
   --sampling-default top_k=20 --sampling-default min_p=0 \
   --max-context 262144 --kv-format int8 --idle-release off
 ```
+
+Swap in a `--model` that fits your Mac's memory:
+
+| Your Mac | Model | Download |
+|---|---|---|
+| 24 GB | `unsloth/Qwen3.8-27B-GGUF:UD-IQ3_XXS` | 16 GB |
+| 36 GB or more | `unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M` | 21 GB |
+| 64 GB | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:Q2_0` | 69 GB |
+| 96 GB or more | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:IQ3_S` | 86 GB |
 
 When it prints `Ready`, start Claude Code in a second terminal:
 
@@ -66,30 +67,6 @@ claude
 `ANTHROPIC_BASE_URL` points Claude Code at Splaude; the token can be any value,
 it only skips the login. The timeouts let Claude Code wait out a long first
 prompt.
-
-## What Splaude adds
-
-Every option is off unless you set it, so without them Splaude behaves like Splash.
-
-**For Claude Code**
-
-| Option | What it does | Upstream |
-|---|---|---|
-| `--accept-any-model` | Serves every model name Claude Code asks for, including its title and summary requests, with the loaded model. | fork only |
-| `--reasoning off` | Never think, whatever the request asks. The default, `auto`, lets each request decide. | [#615](https://github.com/incoai/splash/pull/615) |
-| `--sampling-default NAME=VALUE` | Claude Code sends no sampling settings; these become the defaults. | [#614](https://github.com/incoai/splash/pull/614) |
-| `--sampling-headers` | Set sampling per session through headers, e.g. `ANTHROPIC_CUSTOM_HEADERS=$'X-Temperature: 0.7'`. | [#618](https://github.com/incoai/splash/pull/618) |
-| `--chat-template-file FILE` | Use your own chat template. | fork only |
-
-**For supervisors and proxies**
-
-| Option | What it does | Upstream |
-|---|---|---|
-| `--engine-failure exit` | Exit when the engine fails, so the supervisor restarts it. | [#617](https://github.com/incoai/splash/pull/617) |
-| `--spawn-guard COMMAND` | Run a check before every engine start. | [#637](https://github.com/incoai/splash/pull/637) |
-| `--llama-cpp-compat` | llama.cpp-style `/slots`, `/props` and `id_slot`, for proxies such as [llama-swap](https://github.com/pcvelz/llama-swap-macos-extended). | [#638](https://github.com/incoai/splash/pull/638) |
-| `-m` / `--model-file PATH` | Report which model file is served. | fork only |
-| (relaunch) | A new engine starts only after the old one exits. | merged, [#616](https://github.com/incoai/splash/pull/616) |
 
 ## Models
 
@@ -148,6 +125,30 @@ A model does not have to fit in memory: Splaude streams the experts it is not
 using from the SSD.
 
 ![Qwen3.8-Flash-Next memory: llama.cpp against Splaude](docs/images/larger-than-memory.svg)
+
+## What Splaude adds
+
+Every option is off unless you set it, so without them Splaude behaves like Splash.
+
+**For Claude Code**
+
+| Option | What it does | Upstream |
+|---|---|---|
+| `--accept-any-model` | Serves every model name Claude Code asks for, including its title and summary requests, with the loaded model. | fork only |
+| `--reasoning off` | Never think, whatever the request asks. The default, `auto`, lets each request decide. | [#615](https://github.com/incoai/splash/pull/615) |
+| `--sampling-default NAME=VALUE` | Claude Code sends no sampling settings; these become the defaults. | [#614](https://github.com/incoai/splash/pull/614) |
+| `--sampling-headers` | Set sampling per session through headers, e.g. `ANTHROPIC_CUSTOM_HEADERS=$'X-Temperature: 0.7'`. | [#618](https://github.com/incoai/splash/pull/618) |
+| `--chat-template-file FILE` | Use your own chat template. | fork only |
+
+**For supervisors and proxies**
+
+| Option | What it does | Upstream |
+|---|---|---|
+| `--engine-failure exit` | Exit when the engine fails, so the supervisor restarts it. | [#617](https://github.com/incoai/splash/pull/617) |
+| `--spawn-guard COMMAND` | Run a check before every engine start. | [#637](https://github.com/incoai/splash/pull/637) |
+| `--llama-cpp-compat` | llama.cpp-style `/slots`, `/props` and `id_slot`, for proxies such as [llama-swap](https://github.com/pcvelz/llama-swap-macos-extended). | [#638](https://github.com/incoai/splash/pull/638) |
+| `-m` / `--model-file PATH` | Report which model file is served. | fork only |
+| (relaunch) | A new engine starts only after the old one exits. | merged, [#616](https://github.com/incoai/splash/pull/616) |
 
 ## More
 
