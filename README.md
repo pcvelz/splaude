@@ -1,9 +1,29 @@
 # Splaude
 
-**Splash for Claude Code.** A fast local inference engine for Apple silicon,
-ready for Claude Code.
+**Claude Code, running on your own Mac.** Private and free: nothing leaves your machine.
 
-Splaude is a fork of [Splash](https://github.com/incoai/splash) with the server options
+## Get started
+
+1. Install:
+
+```bash
+brew install pcvelz/tap/splaude
+```
+
+2. Run:
+
+```bash
+splaude
+```
+
+Claude does the rest.
+
+## How it works
+
+[![Splaude: Claude Code on Splash, compared with llama.cpp](docs/images/how-it-fits.svg)](https://pcvelz.github.io/splaude/claude-code-overview.html)
+
+Splaude is a fork of [Splash](https://github.com/incoai/splash), a local inference
+engine for Apple silicon, with the server options
 [Claude Code](https://docs.anthropic.com/en/docs/claude-code) needs. Start one
 server, point Claude Code at it, and the full harness runs locally: the tool
 loop, hooks, subagents and long contexts. No API key, and no tokens leave the
@@ -12,15 +32,21 @@ fast and prefills over 2x as fast, and it runs models larger than memory by
 loading unused weights from the SSD on demand
 ([comparison](docs/claude-code-benchmarks.md)).
 
-[![Splaude: Claude Code on Splash, compared with llama.cpp](docs/images/how-it-fits.svg)](https://pcvelz.github.io/splaude/claude-code-overview.html)
+## Manual installation
 
-## Quick start
+Needs an Apple M3 or newer with macOS 26.4 or later. Pick a model for your
+Mac's memory:
 
-On an Apple M3 or newer with macOS 26.4 or later:
+| Your Mac | Model | Download |
+|---|---|---|
+| 24 GB | `unsloth/Qwen3.8-27B-GGUF:UD-IQ3_XXS` | 16 GB |
+| 36 GB or more | `unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M` | 21 GB |
+| 64 GB | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:Q2_0` | 69 GB |
+| 96 GB or more | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:IQ3_S` | 86 GB |
+
+Start the server:
 
 ```bash
-brew install pcvelz/tap/splaude
-
 splaude serve --model unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL \
   --accept-any-model --sampling-headers \
   --sampling-default temperature=1.0 --sampling-default top_p=0.95 \
