@@ -810,6 +810,7 @@ SERVE_OPTIONS = (
             "decides (default: SPLASH_REASONING, else auto)",
         ),
         environment="SPLASH_REASONING",
+        needs="reasoning_switch",
     ),
     ServeOption(
         "--default-reasoning-effort",
