@@ -305,6 +305,6 @@ def attach_probes(server, lanes, queue_size):
             payload = json.loads(slots_body(status, lanes.snapshot(), queue_size))
         else:
             payload = json.loads(props_body(status, queue_size))
-        self._json(200, payload)
+        self.send_json(200, payload)
 
     server.compat_probes = probes
