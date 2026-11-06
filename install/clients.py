@@ -194,6 +194,14 @@ def _claude(path, server, environment, arguments):
         CLAUDE_CODE_USE_VERTEX="0",
         CLAUDE_CODE_USE_FOUNDRY="0",
     )
+    # A long first prompt takes minutes to process locally; wait it out
+    # instead of retrying it. A timeout the user set is theirs to keep.
+    for name, value in (
+        ("API_TIMEOUT_MS", "86400000"),
+        ("CLAUDE_STREAM_IDLE_TIMEOUT_MS", "86400000"),
+        ("CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK", "1"),
+    ):
+        environment.setdefault(name, value)
     # Auto mode adds classifier inference to tool approval. Start in the
     # normal approval mode, even if the user's global default is auto.
     return [

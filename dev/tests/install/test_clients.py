@@ -205,8 +205,18 @@ class ClientTests(unittest.TestCase):
                 "CLAUDE_CODE_USE_BEDROCK": "0",
                 "CLAUDE_CODE_USE_VERTEX": "0",
                 "CLAUDE_CODE_USE_FOUNDRY": "0",
+                "API_TIMEOUT_MS": "86400000",
+                "CLAUDE_STREAM_IDLE_TIMEOUT_MS": "86400000",
+                "CLAUDE_CODE_DISABLE_NONSTREAMING_FALLBACK": "1",
             },
         )
+
+    def test_claude_launch_keeps_the_users_own_timeouts(self):
+        _, env = self.command(
+            "claude", env={"PATH": "/bin", "API_TIMEOUT_MS": "600000"}
+        )
+        self.assertEqual(env["API_TIMEOUT_MS"], "600000")
+        self.assertEqual(env["CLAUDE_STREAM_IDLE_TIMEOUT_MS"], "86400000")
 
     def test_opencode_launch_registers_the_served_model_for_every_agent(self):
         argv, env = self.command("opencode", env={"PATH": "/bin"})
