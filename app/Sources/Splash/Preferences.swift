@@ -299,6 +299,12 @@ extension LaunchOption {
             flag: "--language-only", title: "Text only",
             help: "Leaves the model’s vision out: it loads less, and refuses images and PDFs.",
             section: .main, kind: .toggle(on: true)),
+        LaunchOption(
+            flag: "--model-file", title: "Model file for a supervisor",
+            help: "The model file this server serves, for a supervisor that reads model files off command lines. Splash only checks it isn’t empty.",
+            section: .main,
+            kind: .text(Value(prompt: "None", message: "The full path of the file, starting with /.",
+                              parse: { $0.hasPrefix("/") && $0.count > 1 ? $0 : nil }), list: false)),
     ]
 
     private static let memory: [LaunchOption] = [
@@ -390,6 +396,11 @@ extension LaunchOption {
 
     private static let api: [LaunchOption] = [
         LaunchOption(
+            flag: "--reasoning", title: "Thinking for every request",
+            help: "Off: no request thinks, whatever its thinking or effort asks. By default each request decides.",
+            section: .api,
+            kind: .choice(standard: "Each Request Decides", choices: [("off", "Off")], custom: nil)),
+        LaunchOption(
             flag: "--default-reasoning-effort", title: "Thinking",
             help: "How much the model thinks for apps whose requests don’t say. The Chat asks for its own.",
             section: .api,
@@ -418,6 +429,30 @@ extension LaunchOption {
             help: "Replies and the model list give the first served model name rather than the model’s own.",
             section: .api, kind: .toggle(on: true),
             requires: [Requirement("Needs a served model name.") { $0["--served-model-name"] != nil }]),
+        LaunchOption(
+            flag: "--accept-any-model", title: "Accept any model name",
+            help: "Requests are served whatever model they name, for a proxy that forwards its clients’ names.",
+            section: .api, kind: .toggle(on: true)),
+        LaunchOption(
+            flag: "--llama-cpp-compat", title: "llama.cpp compatibility",
+            help: "Answers llama.cpp’s slot and property probes and stamps each reply with its slot, for a proxy that supervises children as it does llama-server.",
+            section: .api, kind: .toggle(on: true)),
+        LaunchOption(
+            flag: "--chat-template-file", title: "Chat template file",
+            help: "A Jinja chat template to use instead of the one the model carries. A file that can’t be read stops the server.",
+            section: .api,
+            kind: .text(Value(prompt: "Model’s Own", message: "The full path of the file, starting with /.",
+                              parse: { $0.hasPrefix("/") && $0.count > 1 ? $0 : nil }), list: false)),
+        LaunchOption(
+            flag: "--sampling-default", title: "Sampling defaults",
+            help: "The value of a sampling setting for requests that set none, as name=value, such as temperature=0.7.",
+            section: .api,
+            kind: .text(Value(prompt: "temperature=0.7", message: "Name=value pairs, split at commas.",
+                              parse: { samplingDefaults($0) }), list: true)),
+        LaunchOption(
+            flag: "--sampling-headers", title: "Sampling from headers",
+            help: "Reads each request’s sampling from its X-Temperature, X-Presence-Penalty and X-Repetition-Penalty headers, for apps such as Claude Code that can’t set it in the request.",
+            section: .api, kind: .toggle(on: true)),
     ]
 
     private static let requests: [LaunchOption] = [
@@ -461,6 +496,17 @@ extension LaunchOption {
             flag: "--allow-idle-sleep", title: "Keep Mac awake while answering",
             help: "The Mac doesn’t sleep in the middle of an answer; the display still may.",
             section: .requests, kind: .toggle(on: false)),
+        LaunchOption(
+            flag: "--engine-failure", title: "When the engine fails",
+            help: "What a failure of a ready engine does. By default the server starts a new engine in place; Exit stops it so a supervisor can start it again.",
+            section: .requests,
+            kind: .choice(standard: "Relaunch in Place", choices: [("exit", "Exit for the Supervisor")], custom: nil)),
+        LaunchOption(
+            flag: "--spawn-guard", title: "Spawn guard",
+            help: "A command run before every engine start; one that exits with anything but 0 refuses the start.",
+            section: .requests,
+            kind: .text(Value(prompt: "None", message: "A shell command.",
+                              parse: { $0.trimmingCharacters(in: .whitespaces).isEmpty ? nil : $0 }), list: false)),
     ]
 
     /// What the options of the SSD cache need: the cache itself.
@@ -483,6 +529,16 @@ extension LaunchOption {
                   let value = text.trimmingCharacters(in: .whitespaces).lowercased()
                   return value.wholeMatch(of: /\d+[smh]?/) != nil ? value : nil
               })
+    }
+
+    /// `text` as name=value pairs split at commas and spaces, or nil for anything else.
+    private static let samplingDefaults: @Sendable (String) -> String? = { text in
+        let pairs = items(text)
+        let valid = pairs.allSatisfy { pair in
+            let parts = pair.split(separator: "=", omittingEmptySubsequences: false)
+            return parts.count == 2 && !parts[0].isEmpty && Double(parts[1]) != nil
+        }
+        return !pairs.isEmpty && valid ? pairs.joined(separator: ", ") : nil
     }
 
     private static let whole: @Sendable (String) -> String? = { Int($0.trimmingCharacters(in: .whitespaces)).flatMap { $0 > 0 ? String($0) : nil } }
