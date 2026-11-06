@@ -1,8 +1,8 @@
 # Splaude
 
-**Splaude = Claude Code + Splash.** Your familiar Claude Code, running on
-Splash: a fast AI engine on your own Mac or MacBook. Private: nothing leaves
-your machine.
+Splaude is Claude Code, the AI coding assistant in your terminal, on Splash, a
+fast engine that runs AI models on your own Mac or MacBook. Private: nothing
+leaves your machine.
 
 ## Get started
 
@@ -18,7 +18,9 @@ brew install pcvelz/tap/splaude
 splaude
 ```
 
-Claude does the rest.
+Claude does the rest: it picks the models that fit your Mac, you choose one,
+and Splaude downloads it, starts Splash and opens Claude Code on it. From then
+on `splaude` just opens Claude Code; `splaude setup` starts over.
 
 Rather set it up yourself? See [Manual installation](#manual-installation).
 
@@ -38,24 +40,41 @@ loading unused weights from the SSD on demand
 
 ## Manual installation
 
-Needs an Apple M3 or newer with macOS 26.4 or later. Start the server:
+Needs an Apple M3 or newer with macOS 26.4 or later. Start the server, here
+with Qwen3.8-27B and the settings we run Claude Code with on a 48 GB Mac:
 
 ```bash
-splaude serve --model unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL \
-  --accept-any-model --sampling-headers \
-  --sampling-default temperature=1.0 --sampling-default top_p=0.95 \
+splaude serve --model unsloth/Qwen3.8-27B-GGUF:UD-Q6_K_XL \
+  --accept-any-model --sampling-headers --reasoning off \
+  --sampling-default temperature=0.7 --sampling-default top_p=0.8 \
   --sampling-default top_k=20 --sampling-default min_p=0 \
+  --sampling-default presence_penalty=1.5 \
   --max-context 262144 --kv-format int8 --idle-release off
 ```
 
 Swap in a `--model` that fits your Mac's memory:
 
-| Your Mac | Model | Download |
-|---|---|---|
-| 24 GB | `unsloth/Qwen3.8-27B-GGUF:UD-IQ3_XXS` | 16 GB |
-| 36 GB or more | `unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M` | 21 GB |
-| 64 GB | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:Q2_0` | 69 GB |
-| 96 GB or more | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:IQ3_S` | 86 GB |
+| Your Mac | Model | Download | Note |
+|---|---|---|---|
+| 24 GB | `unsloth/Qwen3.8-27B-GGUF:UD-IQ3_XXS` | 16 GB | Splash's suggestion |
+| 36 GB | `unsloth/Qwen3.8-27B-GGUF:UD-Q4_K_M` | 21 GB | Splash's suggestion |
+| 48 GB | `unsloth/Qwen3.8-27B-GGUF:UD-Q6_K_XL` | 26 GB | tested by us |
+| 48 GB | `unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL` | 111 GB | tested by us, streams from the SSD |
+| 64 GB | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:Q2_0` | 69 GB | Splash's suggestion |
+| 96 GB or more | `ISTA-DASLab/Qwen3.8-Flash-Next-GSQ-RCO-GGUF:IQ3_S` | 86 GB | Splash's suggestion |
+
+Qwen3.8-Flash-Next runs with reasoning on and its own sampling:
+
+```bash
+splaude serve --model unsloth/Qwen3.8-Flash-Next-GGUF:UD-Q4_K_XL \
+  --accept-any-model --sampling-headers --reasoning auto \
+  --sampling-default temperature=1.0 --sampling-default top_p=0.95 \
+  --sampling-default top_k=20 --sampling-default min_p=0 \
+  --sampling-default presence_penalty=0 --sparse-kv-memory 1200M \
+  --max-context 262144 --kv-format int8 --idle-release off
+```
+
+and Claude Code with `MAX_THINKING_TOKENS=4096` added to the lines below.
 
 When it prints `Ready`, start Claude Code in a second terminal:
 
@@ -68,7 +87,7 @@ claude
 
 `ANTHROPIC_BASE_URL` points Claude Code at Splaude; the token can be any value,
 it only skips the login. The timeouts let Claude Code wait out a long first
-prompt.
+prompt. `splaude claude` starts Claude Code with exactly these set.
 
 ## Models
 
