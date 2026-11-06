@@ -1,6 +1,8 @@
 # Splaude
 
-**Claude Code, running on your own Mac.** Private and free: nothing leaves your machine.
+**Splaude = Claude Code + Splash.** Your familiar Claude Code, running on
+Splash: a fast AI engine on your own Mac or MacBook. Private: nothing leaves
+your machine.
 
 ## Get started
 
