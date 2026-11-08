@@ -194,6 +194,8 @@ def load_config():
             "serve": saved.get("serve", []),
             "env": saved.get("env", {}),
         }
+        if saved.get("auto_update") is True:
+            config["auto_update"] = True
     except (OSError, ValueError, KeyError, TypeError, argparse.ArgumentTypeError):
         return None
     if not (isinstance(config["serve"], list) and isinstance(config["env"], dict)):
@@ -721,6 +723,11 @@ def automatic():
         while installed is None and choose("What now?", retry) == 0:
             installed = install(option)
     config, server = installed
+    # brew's own autoupdate (homebrew/autoupdate) already keeps it current.
+    brew_autoupdate = Path.home() / "Library/LaunchAgents/com.github.domt4.homebrew-autoupdate.plist"
+    config["auto_update"] = not brew_autoupdate.exists() and 0 == choose(
+        "Update Splaude automatically each time it starts?", [("Yes", ""), ("No", "")]
+    )
     save_config(config)
     print("  You're ready. From now on, just run: splaude\n")
     start = False
@@ -766,6 +773,8 @@ def main(setup=False):
     try:
         config = None if setup else load_config()
         if config is not None:
+            if config.get("auto_update") and (brew := shutil.which("brew")):
+                subprocess.run([brew, "upgrade", "pcvelz/tap/splaude"], check=False)
             return run(config)
         if not (sys.stdin.isatty() and sys.stdout.isatty()):
             return manual("no interactive terminal")
