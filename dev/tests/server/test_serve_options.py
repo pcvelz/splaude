@@ -75,6 +75,12 @@ OPTIONS = {
         ("", "has space", "a?b", "a#b", "a%b", "a\\b", "/a", "a//b", "a/../b"),
         repeatable=True,
     ),
+    "--sampling-default": values(
+        "--sampling-default",
+        {"temperature=0.6": ("temperature", 0.6), "top_k=40": ("top_k", 40)},
+        ("temperature", "nope=1", "top_k=1.5", "top_p=x"),
+        repeatable=True,
+    ),
     "--announce-served-name": (
         [(["--announce-served-name", "--served-model-name=local"], True)],
         [["--announce-served-name"]],
@@ -118,6 +124,10 @@ OPTIONS = {
         "--cached-states", {"int8": "int8", "exact": "exact"}, ("", "fp32", "Exact")
     ),
     "--disable-ane": ([(["--disable-ane"], True)], []),
+    "--recalibrate-ane": (
+        [(["--recalibrate-ane"], True)],
+        [["--recalibrate-ane", "--disable-ane"]],
+    ),
     "--activations": values(
         "--activations", {"auto": "auto", "bf16": "bf16"}, ("", "on", "off", "BF16")
     ),
@@ -258,6 +268,9 @@ OPTIONS = {
         "--spawn-guard",
         {'test -z "$(pgrep -x splash)"': 'test -z "$(pgrep -x splash)"'},
         ("", " "),
+    ),
+    "--max-concurrent-requests": values(
+        "--max-concurrent-requests", {"8": 8, "1": 1}, ("0", "9", "1.5", "all")
     ),
     "--api-key": values(
         "--api-key",
@@ -409,10 +422,23 @@ class ServeOptionsTests(unittest.TestCase):
                 os.environ.pop("SPLASH_LLAMA_CPP_COMPAT", None)
                 self.assertIs(parse(required).llama_cpp_compat, False)
 
+    def test_a_sampling_default_no_request_may_set_is_refused_as_a_request_is(self):
+        # By `splash serve` too, before it downloads or installs anything.
+        for parse, required in PARSERS:
+            with self.subTest(parser=parse.__module__):
+                refusal = self.refuse(
+                    parse, [*required, "--sampling-default", "temperature=5"]
+                )
+                self.assertIn("temperature must be a number in [0, 2]", refusal)
+
     def test_launcher_forwards_exactly_what_the_server_parses(self):
-        # Every option at once, but that the effort of every request and the
-        # default effort are refused together: each travels without the other.
-        for left_out in ("--default-reasoning-effort", "--reasoning-effort"):
+        # Every option at once, but that options refused together each travel
+        # without the other: the effort of every request and the default
+        # effort, and --recalibrate-ane and --disable-ane.
+        for left_out in (
+            ("--default-reasoning-effort", "--disable-ane"),
+            ("--reasoning-effort", "--recalibrate-ane"),
+        ):
             with self.subTest(left_out=left_out):
                 self.forward_all_but(left_out)
         # Defaults stay with the server, which reads them itself.
@@ -425,12 +451,13 @@ class ServeOptionsTests(unittest.TestCase):
             *(
                 argument
                 for flag, (accepted, _) in OPTIONS.items()
-                if flag != left_out
+                if flag not in left_out
                 for arguments, _ in accepted[-1:]
                 for argument in arguments
             ),
             # A repeatable option keeps every value, in order.
             "--served-model-name=stable",
+            "--sampling-default=presence_penalty=1.5",
             "--allowed-host=proxy.local",
             "--allowed-origin=tauri://localhost",
         ]
@@ -448,7 +475,7 @@ class ServeOptionsTests(unittest.TestCase):
                 if isinstance(option.flag, str)
                 else next(f for f in option.flag if f.startswith("--"))
                 for option in serve_options.SERVE_OPTIONS
-                if not option.secret and option.flag != left_out
+                if not option.secret and option.flag not in left_out
             },
         )
         self.assertFalse(any("secret-key" in argument for argument in argv))
